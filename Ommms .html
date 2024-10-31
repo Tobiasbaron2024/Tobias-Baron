@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Senioren-Service - Arztbegleitung und Einkaufshilfe">
+    <title>Martins Senioren-Service</title>
+    <style>
+        :root {
+            --primary: #2C5282;
+            --secondary: #4299E1;
+            --success: #48BB78;
+            --background: #F7FAFC;
+            --text: #2D3748;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+            font-size: 16px;
+        }
+
+        .app-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .button:hover {
+            background: var(--secondary);
+        }
+
+        .price-list {
+            list-style: none;
+        }
+
+        .price-list li {
+            padding: 1rem;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-tag {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .time-slot {
+            padding: 0.8rem;
+            text-align: center;
+            background: #edf2f7;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.8rem;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: var(--text);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: 2rem auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-button {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card {
+                border-radius: 8px;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>Martins Senioren-Service</h1>
+        <p>Ihre Unterstützung im Alltag</p>
+    </header>
+
+    <div class="container">
+        <!-- Servicezeiten -->
+        <div class="card">
+            <h2>Unsere Servicezeiten</h2>
+            <ul class="price-list">
+                <li>
+                    <span>Montag - Samstag</span>
+                    <span>ab 18:00 Uhr</span>
+                </li>
+                <li>
+                    <span>Sonntag</span>
+                    <span>nach Absprache</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Preise -->
+        <div class="card">
+            <h2>Unsere Leistungen</h2>
+            <ul class="price-list">
+                <li>
+                    <span>Arzt-Begleitservice</span>
+                    <span class="price-tag">22€/Stunde</span>
+                </li>
+                <li>
+                    <span>Einkaufsservice</span>
+                    <span class="price-tag">20€/Stunde</span>
+                </li>
+                <li>
+                    <span>Express-Service</span>
+                    <span class="price-tag">+5€/Stunde</span>
+                </li>
+                <li>
+                    <span>Wochenend-Zuschlag</span>
+                    <span class="price-tag">+5€/Stunde</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Buchungsformular -->
+        <div class="card" id="booking-section">
+            <h2>Termin buchen</h2>
+            <form id="booking-form" onsubmit="submitBooking(event)">
+                <div class="form-group">
+                    <label class="form-label">Service auswählen:</label>
+                    <select class="form-input" name="service" required>
+                        <option value="">Bitte wählen...</option>
+                        <option value="arzt">Arzt-Begleitservice</option>
+                        <option value="einkauf">Einkaufsservice</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Datum:</label>
+                    <input type="date" class="form-input" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Verfügbare Zeiten:</label>
+                    <div class="time-slots">
+                        <div class="time-slot" onclick="selectTime(this)">18:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">19:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">20:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">21:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">22:00</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Name:</label>
+                    <input type="text" class="form-input" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Telefon:</label>
+                    <input type="tel" class="form-input" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">E-Mail:</label>
+                    <input type="email" class="form-input" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Bemerkungen:</label>
+                    <textarea class="form-input" name="notes" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="button">Termin anfragen</button>
+            </form>
+        </div>
+
+        <!-- Kontakt -->
+        <div class="card">
+            <h2>Direktkontakt</h2>
+            <a href="tel:0123456789" class="button" style="text-decoration: none; text-align: center; display: block; margin-top: 1rem;">
+                📞 0123 - 456789
+            </a>
+        </div>
+
+        <!-- Footer Links -->
+        <div style="text-align: center; margin: 2rem 0;">
+            <a href="#" onclick="showImpressum(event)">Impressum</a> |
+            <a href="#" onclick="showDatenschutz(event)">Datenschutz</a>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-menu">
+        <a href="#" class="nav-item active">
+            🏠<br>Start
+        </a>
+        <a href="#booking-section" class="nav-item">
+            📅<br>Buchen
+        </a>
+        <a href="tel:0123456789" class="nav-item">
+            📞<br>Anrufen
+        </a>
+    </nav>
+
+    <!-- Impressum Modal -->
+    <div id="impressum-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeModal('impressum-modal')">&times;</button>
+            <h2>Impressum</h2>
+            <p>Martins Senioren-Service</p>
+            <p>Inhaberin: Claudia Hellmig</p>
+            <p>[Ihre Adresse]</p>
+            <p>Telefon: 0123 - 456789</p>
+            <p>E-Mail: claudiahellmig@gmail.com</p>
+        </div>
+    </div>
+
+    <!-- Datenschutz Modal -->
+    <div id="datenschutz-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeModal('datenschutz-modal')">&times;</button>
+            <h2>Datenschutzerklärung</h2>
+            <p>Ihre Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet und nicht an Dritte weitergegeben.</p>
+            <!-- Hier können Sie eine ausführlichere Datenschutzerklärung einfügen -->
+        </div>
+    </div>
+
+    <script>
+        let selectedTime = null;
+
+        function selectTime(element) {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedTime = element.textContent;
+        }
+
+        function submitBooking(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            // E-Mail zusammenstellen
+            const mailtoLink = `mailto:claudiahellmig@gmail.com
+                ?subject=Neue Buchung - Senioren-Service
+                &body=Neue Terminanfrage:%0D%0A
+                %0D%0A
+                Service: ${formData.get('service')}%0D%0A
+                Datum: ${formData.get('date')}%0D%0A
+                Uhrzeit: ${selectedTime}%0D%0A
+                %0D%0A
+                Kundeninformationen:%0D%0A
+                Name: ${formData.get('name')}%0D%0A
+                Telefon: ${formData.get('phone')}%0D%0A
+                E-Mail: ${formData.get('email')}%0D%0A
+                %0D%0A
+                Bemerkungen:%0D%0A
+                ${formData.get('notes') || 'Keine Bemerkungen'}`;
+
+            window.location.href = mailtoLink;
+            alert('Vielen Dank für Ihre Anfrage! Sie werden zur E-Mail-Bestätigung weitergeleitet.');
+            event.target.reset();
+        }
+
+        function showImpressum(event) {
+            event.preventDefault();
+            document.getElementById('impressum-modal').style.display = 'block';
+        }
+
+        function showDatenschutz(event) {
+            event.preventDefault();
+            document.getElementById('datenschutz-modal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Schließe Modal beim Klick außerhalb
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Setze minimales Datum auf heute
+        document.querySelector('input[type="date"]').min = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>
