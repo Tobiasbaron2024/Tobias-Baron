@@ -350,8 +350,12 @@
 
         function submitBooking(event) {
             event.preventDefault();
+            if (!selectedTime) {
+                alert('Bitte wählen Sie eine Uhrzeit aus, bevor Sie fortfahren.');
+                return;
+            }
             const formData = new FormData(event.target);
-            
+
             // E-Mail zusammenstellen
             const mailtoLink = `mailto:claudiahellmig@gmail.com
                 ?subject=Neue Buchung - Senioren-Service
@@ -372,6 +376,10 @@
             window.location.href = mailtoLink;
             alert('Vielen Dank für Ihre Anfrage! Sie werden zur E-Mail-Bestätigung weitergeleitet.');
             event.target.reset();
+            selectedTime = null;
+            document.querySelectorAll('.time-slot.selected').forEach(slot => {
+                slot.classList.remove('selected');
+            });
         }
 
         function showImpressum(event) {
