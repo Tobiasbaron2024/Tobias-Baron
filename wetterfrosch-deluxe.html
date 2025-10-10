@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WetterFrosch Deluxe 🐸☔</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Allgemeine Stile */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #3b8d99, #6b6b83, #aa4b6b);
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .search-container input {
+            width: 60%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px 0 0 6px;
+            font-size: 1em;
+        }
+        .search-container button {
+            padding: 10px;
+            border: none;
+            background-color: #ff5e57;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .search-container button:first-of-type {
+            border-radius: 0 6px 6px 0;
+        }
+        .search-container button:last-of-type {
+            border-radius: 6px;
+            margin-left: 10px;
+        }
+        .search-container button:hover {
+            background-color: #ff3830;
+        }
+        .unit-toggle {
+            margin-top: 10px;
+        }
+        .wetter-sektion {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .wetter-sektion h2 {
+            margin-top: 0;
+        }
+        .wetter-sektion img {
+            width: 80px;
+            height: 80px;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #cccccc;
+        }
+        /* Neue Stile für die Vorhersagekarten */
+        .vorhersage-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .vorhersage-tag {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin: 10px;
+            padding: 10px;
+            width: 150px;
+            text-align: center;
+        }
+        /* Responsives Design */
+        @media (max-width: 600px) {
+            .app-container {
+                width: 90%;
+                padding: 10px;
+            }
+            .search-container input {
+                width: 70%;
+            }
+            .wetter-sektion {
+                padding: 10px;
+            }
+        }
+        /* Fehlernachrichten-Stil */
+        .error-message {
+            color: #ff5e57;
+            margin-top: 10px;
+        }
+        /* Stil für Empfehlungen */
+        .empfehlung {
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🐸 WetterFrosch Deluxe ☔</h1>
+            <div class="search-container">
+                <input type="text" id="stadt" placeholder="Stadt eingeben..." />
+                <button id="sucheWetter">🔍</button>
+                <button id="standort">📍</button>
+            </div>
+            <div class="unit-toggle">
+                <label for="einheit">Einheit:</label>
+                <select id="einheit">
+                    <option value="metric">°C</option>
+                    <option value="imperial">°F</option>
+                </select>
+            </div>
+            <div id="fehler" class="error-message"></div>
+        </header>
+        <main>
+            <section id="aktuellesWetter" class="wetter-sektion"></section>
+            <section id="vorhersageContainer" class="wetter-sektion"></section>
+        </main>
+        <footer>
+            <p>Erstellt mit ❤️ von Ihrem Namen</p>
+        </footer>
+    </div>
+    <script>
+        const apiKey = "7190bcfcb5c5ecd81d00dfc4e518ea21";
+
+        document.getElementById("sucheWetter").addEventListener("click", () => {
+            const stadt = document.getElementById("stadt").value.trim();
+            document.getElementById("fehler").textContent = "";
+            if (stadt) {
+                fetchKoordinaten(stadt);
+            } else {
+                anzeigenFehler("Bitte geben Sie eine Stadt ein!");
+            }
+        });
+
+        document.getElementById("standort").addEventListener("click", () => {
+            document.getElementById("fehler").textContent = "";
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        fetchWetter(latitude, longitude);
+                    },
+                    () => anzeigenFehler("Standortzugriff wurde verweigert.")
+                );
+            } else {
+                anzeigenFehler("Geolocation wird von Ihrem Browser nicht unterstützt.");
+            }
+        });
+
+        async function fetchKoordinaten(stadt) {
+            try {
+                const url = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(stadt)}&limit=1&appid=${apiKey}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Netzwerkantwort war nicht ok.");
+                const data = await response.json();
+                if (data.length > 0) {
+                    const { lat, lon } = data[0];
+                    fetchWetter(lat, lon);
+                } else {
+                    anzeigenFehler("Stadt nicht gefunden!");
+                }
+            } catch (error) {
+                console.error("Fehler beim Abrufen der Koordinaten:", error);
+                anzeigenFehler("Fehler beim Abrufen der Koordinaten.");
+            }
+        }
+
+        async function fetchWetter(lat, lon) {
+            try {
+                const einheit = document.getElementById("einheit").value;
+                const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=${einheit}&lang=de&appid=${apiKey}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Netzwerkantwort war nicht ok.");
+                const data = await response.json();
+                anzeigenAktuellesWetter(data.current, data.timezone, einheit);
+                anzeigenVorhersage(data.daily, einheit, data.timezone);
+            } catch (error) {
+                console.error("Fehler beim Abrufen der Wetterdaten:", error);
+                anzeigenFehler("Fehler beim Abrufen der Wetterdaten.");
+            }
+        }
+
+        function anzeigenAktuellesWetter(current, timezone, einheit) {
+            const aktuellesWetterDiv = document.getElementById("aktuellesWetter");
+            aktuellesWetterDiv.innerHTML = "";
+
+            const { temp, feels_like, humidity, weather, dt, wind_speed, wind_deg, sunrise, sunset, uvi } = current;
+            const beschreibung = weather[0].description;
+            const icon = weather[0].icon;
+
+            // Lokale Zeit berechnen
+            const options = { timeZone: timezone, hour: '2-digit', minute: '2-digit' };
+            const lokaleZeit = new Intl.DateTimeFormat('de-DE', options).format(new Date(dt * 1000));
+
+            // Sonnenaufgang und Sonnenuntergang
+            const sunriseTime = new Intl.DateTimeFormat('de-DE', options).format(new Date(sunrise * 1000));
+            const sunsetTime = new Intl.DateTimeFormat('de-DE', options).format(new Date(sunset * 1000));
+
+            // Windrichtung ermitteln
+            const windRichtung = getWindrichtung(wind_deg);
+
+            // Einheitensymbol
+            const tempEinheit = einheit === "metric" ? "°C" : "°F";
+            const windEinheit = einheit === "metric" ? "m/s" : "mph";
+
+            // Empfehlungen generieren
+            const empfehlung = generiereEmpfehlung(temp, beschreibung);
+
+            aktuellesWetterDiv.innerHTML = `
+                <h2>Aktuelles Wetter (${lokaleZeit})</h2>
+                <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${beschreibung}" />
+                <p>Temperatur: ${temp.toFixed(1)}${tempEinheit} (gefühlt: ${feels_like.toFixed(1)}${tempEinheit})</p>
+                <p>Beschreibung: ${beschreibung}</p>
+                <p>Luftfeuchtigkeit: ${humidity}%</p>
+                <p>Wind: ${wind_speed.toFixed(1)} ${windEinheit} aus ${windRichtung}</p>
+                <p>UV-Index: ${uvi}</p>
+                <p>Sonnenaufgang: ${sunriseTime}</p>
+                <p>Sonnenuntergang: ${sunsetTime}</p>
+                <p class="empfehlung">${empfehlung}</p>
+            `;
+        }
+
+        function anzeigenVorhersage(daily, einheit, timezone) {
+            const vorhersageContainer = document.getElementById("vorhersageContainer");
+            vorhersageContainer.innerHTML = "<h2>5-Tage-Vorhersage</h2>";
+
+            const vorhersageDiv = document.createElement("div");
+            vorhersageDiv.className = "vorhersage-container";
+
+            const tempEinheit = einheit === "metric" ? "°C" : "°F";
+
+            daily.slice(1, 6).forEach((tag) => {
+                const options = { timeZone: timezone, weekday: 'long', day: 'numeric', month: 'numeric' };
+                const datum = new Intl.DateTimeFormat('de-DE', options).format(new Date(tag.dt * 1000));
+                const { day, night } = tag.temp;
+                const beschreibung = tag.weather[0].description;
+                const icon = tag.weather[0].icon;
+                const pop = tag.pop * 100; // Niederschlagswahrscheinlichkeit in Prozent
+
+                const tagDiv = document.createElement("div");
+                tagDiv.className = "vorhersage-tag";
+                tagDiv.innerHTML = `
+                    <h3>${datum}</h3>
+                    <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${beschreibung}" />
+                    <p>${day.toFixed(1)}${tempEinheit} / ${night.toFixed(1)}${tempEinheit}</p>
+                    <p>${beschreibung}</p>
+                    <p>Niederschlagswahrscheinlichkeit: ${pop.toFixed(0)}%</p>
+                `;
+                vorhersageDiv.appendChild(tagDiv);
+            });
+
+            vorhersageContainer.appendChild(vorhersageDiv);
+        }
+
+        function generiereEmpfehlung(temp, beschreibung) {
+            let empfehlung = "";
+
+            if (temp >= 25) {
+                empfehlung += "Es ist heiß. Tragen Sie leichte Kleidung und trinken Sie viel Wasser.";
+            } else if (temp >= 15) {
+                empfehlung += "Angenehmes Wetter. Eine Jacke könnte nützlich sein.";
+            } else if (temp >= 5) {
+                empfehlung += "Es ist kühl. Ziehen Sie sich warm an.";
+            } else {
+                empfehlung += "Es ist kalt. Tragen Sie warme Kleidung und denken Sie an eine Mütze und Handschuhe.";
+            }
+
+            if (beschreibung.includes("Regen")) {
+                empfehlung += " Vergessen Sie nicht, einen Regenschirm mitzunehmen.";
+            } else if (beschreibung.includes("Schnee")) {
+                empfehlung += " Es könnte schneien. Seien Sie vorsichtig auf den Straßen.";
+            } else if (beschreibung.includes("Gewitter")) {
+                empfehlung += " Gewitter möglich. Bleiben Sie nach Möglichkeit drinnen.";
+            }
+
+            return empfehlung;
+        }
+
+        function getWindrichtung(deg) {
+            const richtungen = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"];
+            const index = Math.round(((deg %= 360) < 0 ? deg + 360 : deg) / 45) % 8;
+            return richtungen[index];
+        }
+
+        function anzeigenFehler(nachricht) {
+            const fehlerDiv = document.getElementById("fehler");
+            fehlerDiv.textContent = nachricht;
+        }
+    </script>
+</body>
+</html>
