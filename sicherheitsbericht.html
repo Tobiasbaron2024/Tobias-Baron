@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sicherheitsbericht</title>
+
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel für Inline-JSX-Transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- jsPDF & html2canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f5f6fa;
+      }
+      h1,
+      h2 {
+        margin: 0 0 0.5rem 0;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+      }
+      form {
+        flex: 1 1 350px;
+        background: #ffffff;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      label span {
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.25rem;
+        border: 1px solid #cccccc;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+      }
+      textarea {
+        resize: vertical;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #2563eb;
+        color: #ffffff;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 0.6rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #1e4fd5;
+      }
+      /* Vorschau (DIN A4) */
+      .preview-wrapper {
+        flex: 1 1 350px;
+        overflow: auto;
+        max-height: calc(100vh - 2rem);
+        background: #ffffff;
+        border-radius: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      .preview-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 1.5rem 2rem;
+      }
+      .preview-page img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 1rem;
+        border: 1px solid #ddd;
+      }
+      @media print {
+        body {
+          background: none;
+        }
+        form,
+        .preview-wrapper {
+          box-shadow: none;
+        }
+        .preview-wrapper {
+          overflow: visible;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Die App als Inline-JSX -->
+    <script type="text/babel">
+      const { useState, useRef, useEffect, useMemo } = React;
+      const { jsPDF } = window.jspdf;
+
+      const DIN_A4_WIDTH = 210; // mm
+      const STORAGE_KEY = "sicherheitsbericht_entwurf";
+
+      function SicherheitsberichtApp() {
+        const [reportType, setReportType] = useState("Unfallbericht");
+        const [location, setLocation] = useState("");
+        const [date, setDate] = useState("");
+        const [time, setTime] = useState("");
+        const [description, setDescription] = useState("");
+        const [photoUrl, setPhotoUrl] = useState(null);
+
+        const previewRef = useRef(null);
+
+        // Entwurf laden
+        useEffect(() => {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          try {
+            const data = JSON.parse(raw);
+            setReportType(data.reportType || "Unfallbericht");
+            setLocation(data.location || "");
+            setDate(data.date || "");
+            setTime(data.time || "");
+            setDescription(data.description || "");
+            setPhotoUrl(data.photoUrl || null);
+          } catch {}
+        }, []);
+
+        // Entwurf speichern
+        useEffect(() => {
+          const payload = {
+            reportType,
+            location,
+            date,
+            time,
+            description,
+            photoUrl,
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        }, [reportType, location, date, time, description, photoUrl]);
+
+        const handlePhotoUpload = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => setPhotoUrl(ev.target.result);
+          reader.readAsDataURL(file);
+        };
+
+        const handleGeneratePdf = async () => {
+          if (!previewRef.current) return;
+          const canvas = await html2canvas(previewRef.current, { scale: 2, useCORS: true });
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfWidth = DIN_A4_WIDTH;
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+          const filename = `${reportType}_${date || "Datum"}_${time || "Uhrzeit"}.pdf`;
+          pdf.save(filename);
+        };
+
+        const autogeneratedText = useMemo(() => {
+          if (!date && !time && !location && !description) return "—";
+          switch (reportType) {
+            case "Unfallbericht":
+              return `Am ${date || "____"} um ${time || "____"} Uhr ereignete sich am/im ${location || "____"} ein Unfall.\nBetroffene/r: ______________________________________\nBeschreibung: ${description || "____"}\nMaßnahmen: _________________________________________`;
+            case "Schadensmeldung":
+              return `Schaden festgestellt am ${date || "____"} um ${time || "____"} Uhr, Standort: ${location || "____"}.\nBeschreibung des Schadens: ${description || "____"}\nSofortmaßnahmen: ___________________________________`;
+            case "Beinahe-Unfall":
+              return `Beinahe-Ereignis am ${date || "____"} um ${time || "____"} Uhr, Ort: ${location || "____"}.\nWas beinahe passiert wäre: ${description || "____"}\nVorbeugende Maßnahmen: ______________________________`;
+            case "Dienstübergabe":
+              return `Dienstübergabe am ${date || "____"} um ${time || "____"} Uhr.\nOrt/Posten: ${location || "____"}\nBesondere Vorkommnisse: ${description || "____"}`;
+            default:
+              return description || "—";
+          }
+        }, [reportType, date, time, location, description]);
+
+        return (
+          <div className="container">
+            {/* Formular */}
+            <form onSubmit={(e) => { e.preventDefault(); handleGeneratePdf(); }}>
+              <h1>Sicherheitsbericht erstellen</h1>
+
+              {/* Berichtstyp */}
+              <label>
+                <span>Berichtstyp</span>
+                <select value={reportType} onChange={(e) => setReportType(e.target.value)} required>
+                  <option>Unfallbericht</option>
+                  <option>Schadensmeldung</option>
+                  <option>Beinahe-Unfall</option>
+                  <option>Dienstübergabe</option>
+                </select>
+              </label>
+
+              {/* Datum/Uhrzeit */}
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <label style={{ flex: 1 }}>
+                  <span>Datum</span>
+                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                </label>
+                <label style={{ flex: 1 }}>
+                  <span>Uhrzeit</span>
+                  <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
+                </label>
+              </div>
+
+              {/* Ort */}
+              <label>
+                <span>Ort</span>
+                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="z. B. Werkstor A" required />
+              </label>
+
+              {/* Beschreibung */}
+              <label>
+                <span>Beschreibung / Details</span>
+                <textarea rows="6" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Was genau ist passiert?"></textarea>
+              </label>
+
+              {/* Foto */}
+              <label>
+                <span>Foto anhängen</span>
+                <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} />
+              </label>
+
+              {/* Aktion */}
+              <button className="btn" type="submit">PDF erstellen</button>
+            </form>
+
+            {/* Vorschau */}
+            <div className="preview-wrapper">
+              <div className="preview-page" ref={previewRef}>
+                <h2 style={{ textAlign: "center" }}>{reportType}</h2>
+                <p><strong>Ort:</strong> {location || "—"}</p>
+                <p><strong>Datum:</strong> {date || "—"} &nbsp; <strong>Uhrzeit:</strong> {time || "—"}</p>
+                <p style={{ whiteSpace: "pre-wrap" }}>{autogeneratedText}</p>
+                {photoUrl && <img src={photoUrl} alt="Angehängtes Foto" style={{ marginTop: "1rem", maxHeight: "120mm" }} />}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<SicherheitsberichtApp />);
+    </script>
+  </body>
+</html>
