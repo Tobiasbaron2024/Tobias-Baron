@@ -1,402 +1,701 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Senioren-Service - Arztbegleitung und Einkaufshilfe">
-    <title>Martins Senioren-Service</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hvv+ - Die smarte Mobilitäts-App</title>
+    <meta name="description" content="hvv+ – Echtzeit-Fahrpläne, Tickets, Mobilität aus einer Hand" />
     <style>
         :root {
-            --primary: #2C5282;
-            --secondary: #4299E1;
-            --success: #48BB78;
-            --background: #F7FAFC;
-            --text: #2D3748;
+            color-scheme: light dark;
+            --bg: #0f172a;
+            --bg-card: rgba(15, 23, 42, 0.65);
+            --accent: #38bdf8;
+            --accent-strong: #0ea5e9;
+            --accent-soft: rgba(56, 189, 248, 0.12);
+            --text: #f8fafc;
+            --muted: #cbd5f5;
+            --shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            line-height: 1.6;
+            background: radial-gradient(circle at top, rgba(14, 165, 233, 0.3), transparent 60%),
+                linear-gradient(160deg, #0b1220 0%, #0f172a 40%, #1e293b 100%);
             color: var(--text);
-            background: var(--background);
-            font-size: 16px;
+            min-height: 100vh;
+            padding-bottom: 5rem;
         }
 
-        .app-header {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-            padding: 1rem;
-            text-align: center;
+        header {
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(16px);
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 1rem clamp(1rem, 2vw, 2.5rem);
         }
 
-        .container {
-            max-width: 800px;
+        header h1 {
+            font-size: clamp(1.6rem, 2.4vw, 2.6rem);
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        header p {
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        main {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem;
+            padding: clamp(1rem, 2vw, 3rem);
+            display: grid;
+            gap: 1.5rem;
         }
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        section {
+            background: var(--bg-card);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            padding: clamp(1.2rem, 2vw, 2rem);
         }
 
-        .button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            width: 100%;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .button:hover {
-            background: var(--secondary);
-        }
-
-        .price-list {
-            list-style: none;
-        }
-
-        .price-list li {
-            padding: 1rem;
-            border-bottom: 1px solid #edf2f7;
+        .headline {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .price-tag {
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .form-group {
             margin-bottom: 1rem;
         }
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
+        .headline h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
         }
 
-        .form-input {
+        .headline button,
+        .primary-btn,
+        .secondary-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 0.6rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .headline button,
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            color: #041018;
+            box-shadow: 0 10px 24px rgba(14, 165, 233, 0.4);
+        }
+
+        .headline button:hover,
+        .primary-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(14, 165, 233, 0.5);
+        }
+
+        .secondary-btn {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--muted);
+        }
+
+        form {
+            display: grid;
+            gap: 1.1rem;
+        }
+
+        label span {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(248, 250, 252, 0.75);
+        }
+
+        .input-group {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        input,
+        select,
+        textarea {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            padding: 0.9rem 1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text);
             font-size: 1rem;
         }
 
-        .time-slots {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 0.5rem;
-            margin: 1rem 0;
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid rgba(56, 189, 248, 0.45);
+            outline-offset: 1px;
         }
 
-        .time-slot {
-            padding: 0.8rem;
-            text-align: center;
-            background: #edf2f7;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .time-slot.selected {
-            background: var(--primary);
-            color: white;
-        }
-
-        .nav-menu {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
+        .chip-group {
             display: flex;
-            justify-content: space-around;
-            padding: 0.8rem;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
-        .nav-item {
-            text-decoration: none;
+        .chip {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .chip strong {
             color: var(--text);
-            text-align: center;
-            font-size: 0.9rem;
         }
 
-        .nav-item.active {
-            color: var(--primary);
+        .route-result {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.25rem;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
+        .trip-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            border-radius: 18px;
+            padding: 1.1rem;
+            display: grid;
+            gap: 0.8rem;
         }
 
-        .modal-content {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            max-width: 500px;
-            margin: 2rem auto;
-            max-height: 90vh;
-            overflow-y: auto;
+        .trip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
         }
 
-        .close-button {
-            float: right;
-            background: none;
+        .trip-header h3 {
+            font-size: 1.2rem;
+            letter-spacing: 0.01em;
+        }
+
+        .trip-leg {
+            display: grid;
+            gap: 0.35rem;
+            padding-left: 0.75rem;
+            border-left: 3px solid rgba(56, 189, 248, 0.4);
+        }
+
+        .trip-leg strong {
+            color: var(--accent);
+        }
+
+        .occupancy {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+        }
+
+        .occupancy span {
+            display: inline-flex;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+        }
+
+        .ticket-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+        }
+
+        .ticket-card {
+            border-radius: 18px;
+            padding: 1.25rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            box-shadow: 0 10px 24px rgba(8, 145, 178, 0.2);
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .ticket-card h3 {
+            font-size: 1.1rem;
+        }
+
+        .ticket-card p {
+            color: rgba(203, 213, 225, 0.9);
+            line-height: 1.4;
+        }
+
+        .alert-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .alert {
+            border-radius: 16px;
+            padding: 0.9rem 1rem;
+            background: rgba(252, 165, 165, 0.1);
+            border: 1px solid rgba(252, 165, 165, 0.25);
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .alert strong {
+            color: #fca5a5;
+        }
+
+        .inline-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .history-item {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.55);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .history-item button {
+            background: rgba(56, 189, 248, 0.16);
+            color: var(--accent);
             border: none;
-            font-size: 1.5rem;
+            border-radius: 999px;
+            padding: 0.45rem 0.9rem;
             cursor: pointer;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 0.5rem;
+        .map-placeholder {
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(14, 165, 233, 0.05));
+            border: 1px dashed rgba(148, 163, 184, 0.3);
+            padding: 1.75rem;
+            text-align: center;
+            color: rgba(226, 232, 240, 0.8);
+        }
+
+        footer {
+            text-align: center;
+            color: rgba(148, 163, 184, 0.7);
+            padding: 2rem 1rem 4rem;
+        }
+
+        @media (min-width: 960px) {
+            main {
+                grid-template-columns: 2fr 1fr;
+                align-items: start;
             }
-            
-            .card {
-                border-radius: 8px;
-                padding: 1rem;
+
+            main section:nth-child(1) {
+                grid-column: 1 / -1;
+            }
+
+            main section:nth-child(2) {
+                grid-row: span 2;
+            }
+        }
+
+        @media (max-width: 620px) {
+            header {
+                padding: 0.8rem 1rem;
+            }
+
+            .headline {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
             }
         }
     </style>
 </head>
 <body>
-    <header class="app-header">
-        <h1>Martins Senioren-Service</h1>
-        <p>Ihre Unterstützung im Alltag</p>
+    <header>
+        <h1>hvv<span style="color: var(--accent)">+</span></h1>
+        <p>Deine Mobilität in Hamburg – Echtzeit, multimodal, klimafreundlich</p>
     </header>
 
-    <div class="container">
-        <!-- Servicezeiten -->
-        <div class="card">
-            <h2>Unsere Servicezeiten</h2>
-            <ul class="price-list">
-                <li>
-                    <span>Montag - Samstag</span>
-                    <span>ab 18:00 Uhr</span>
-                </li>
-                <li>
-                    <span>Sonntag</span>
-                    <span>nach Absprache</span>
-                </li>
-            </ul>
-        </div>
+    <main>
+        <section>
+            <div class="headline">
+                <h2>Fahrtsuche</h2>
+                <button type="button" id="save-favorite">⭐ Favorit speichern</button>
+            </div>
 
-        <!-- Preise -->
-        <div class="card">
-            <h2>Unsere Leistungen</h2>
-            <ul class="price-list">
-                <li>
-                    <span>Arzt-Begleitservice</span>
-                    <span class="price-tag">22€/Stunde</span>
-                </li>
-                <li>
-                    <span>Einkaufsservice</span>
-                    <span class="price-tag">20€/Stunde</span>
-                </li>
-                <li>
-                    <span>Express-Service</span>
-                    <span class="price-tag">+5€/Stunde</span>
-                </li>
-                <li>
-                    <span>Wochenend-Zuschlag</span>
-                    <span class="price-tag">+5€/Stunde</span>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Buchungsformular -->
-        <div class="card" id="booking-section">
-            <h2>Termin buchen</h2>
-            <form id="booking-form" onsubmit="submitBooking(event)">
-                <div class="form-group">
-                    <label class="form-label">Service auswählen:</label>
-                    <select class="form-input" name="service" required>
-                        <option value="">Bitte wählen...</option>
-                        <option value="arzt">Arzt-Begleitservice</option>
-                        <option value="einkauf">Einkaufsservice</option>
-                    </select>
+            <form id="journey-form">
+                <div class="input-group">
+                    <label><span>Start</span></label>
+                    <input type="text" id="start" placeholder="z. B. Hauptbahnhof" required />
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Datum:</label>
-                    <input type="date" class="form-input" name="date" required>
+                <div class="input-group">
+                    <label><span>Ziel</span></label>
+                    <input type="text" id="destination" placeholder="z. B. Elbphilharmonie" required />
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Verfügbare Zeiten:</label>
-                    <div class="time-slots">
-                        <div class="time-slot" onclick="selectTime(this)">18:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">19:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">20:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">21:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">22:00</div>
+                <div class="inline-actions">
+                    <div class="input-group" style="flex: 1">
+                        <label><span>Datum</span></label>
+                        <input type="date" id="date" />
+                    </div>
+                    <div class="input-group" style="flex: 1">
+                        <label><span>Abfahrtszeit</span></label>
+                        <input type="time" id="time" />
+                    </div>
+                    <div class="input-group" style="flex: 1">
+                        <label><span>Mobilität</span></label>
+                        <select id="mobility">
+                            <option value="oepnv" selected>ÖPNV</option>
+                            <option value="stadtrad">Stadtrad + ÖPNV</option>
+                            <option value="sharing">Sharing &amp; ÖPNV</option>
+                        </select>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Name:</label>
-                    <input type="text" class="form-input" name="name" required>
+                <div class="chip-group">
+                    <span class="chip"><strong>AI+</strong> beste Route</span>
+                    <span class="chip">CO₂ ⬇ 38%</span>
+                    <span class="chip">Live-Auslastung</span>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Telefon:</label>
-                    <input type="tel" class="form-input" name="phone" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">E-Mail:</label>
-                    <input type="email" class="form-input" name="email" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Bemerkungen:</label>
-                    <textarea class="form-input" name="notes" rows="3"></textarea>
-                </div>
-
-                <button type="submit" class="button">Termin anfragen</button>
+                <button class="primary-btn" type="submit">Verbindungen anzeigen</button>
             </form>
-        </div>
 
-        <!-- Kontakt -->
-        <div class="card">
-            <h2>Direktkontakt</h2>
-            <a href="tel:0123456789" class="button" style="text-decoration: none; text-align: center; display: block; margin-top: 1rem;">
-                📞 0123 - 456789
-            </a>
-        </div>
+            <div id="route-results" class="route-result" aria-live="polite"></div>
+        </section>
 
-        <!-- Footer Links -->
-        <div style="text-align: center; margin: 2rem 0;">
-            <a href="#" onclick="showImpressum(event)">Impressum</a> |
-            <a href="#" onclick="showDatenschutz(event)">Datenschutz</a>
-        </div>
-    </div>
+        <section>
+            <div class="headline">
+                <h2>Tickets &amp; Preise</h2>
+                <button class="secondary-btn" type="button" id="ticket-subscribe">Abo vergleichen</button>
+            </div>
+            <div class="ticket-grid" id="ticket-grid"></div>
+        </section>
 
-    <!-- Navigation -->
-    <nav class="nav-menu">
-        <a href="#" class="nav-item active">
-            🏠<br>Start
-        </a>
-        <a href="#booking-section" class="nav-item">
-            📅<br>Buchen
-        </a>
-        <a href="tel:0123456789" class="nav-item">
-            📞<br>Anrufen
-        </a>
-    </nav>
+        <section>
+            <div class="headline">
+                <h2>Echtzeit-Infos</h2>
+                <button class="secondary-btn" type="button" id="refresh-alerts">Aktualisieren</button>
+            </div>
+            <div class="alert-list" id="alert-list"></div>
+        </section>
 
-    <!-- Impressum Modal -->
-    <div id="impressum-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-button" onclick="closeModal('impressum-modal')">&times;</button>
-            <h2>Impressum</h2>
-            <p>Martins Senioren-Service</p>
-            <p>Inhaberin: Claudia Hellmig</p>
-            <p>[Ihre Adresse]</p>
-            <p>Telefon: 0123 - 456789</p>
-            <p>E-Mail: claudiahellmig@gmail.com</p>
-        </div>
-    </div>
+        <section>
+            <div class="headline">
+                <h2>Letzte Suchen</h2>
+                <button class="secondary-btn" type="button" id="clear-history">Verlauf löschen</button>
+            </div>
+            <div class="history-list" id="history-list"></div>
+        </section>
 
-    <!-- Datenschutz Modal -->
-    <div id="datenschutz-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-button" onclick="closeModal('datenschutz-modal')">&times;</button>
-            <h2>Datenschutzerklärung</h2>
-            <p>Ihre Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet und nicht an Dritte weitergegeben.</p>
-            <!-- Hier können Sie eine ausführlichere Datenschutzerklärung einfügen -->
-        </div>
-    </div>
+        <section>
+            <div class="headline">
+                <h2>Live-Map</h2>
+                <button class="secondary-btn" type="button">AR-Ansicht öffnen</button>
+            </div>
+            <div class="map-placeholder">
+                <p>Interaktive Karte mit Echtzeitfahrzeugen, Bike-Sharing-Docks und Fußwegen.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Im echten Produkt erscheint hier die Live-Karte mit AR-Overlay.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        hvv+ ist ein Konzept für eine moderne, integrative Mobilitätsplattform. Alle Daten sind Demo-Inhalte.
+    </footer>
 
     <script>
-        let selectedTime = null;
-
-        function selectTime(element) {
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            element.classList.add('selected');
-            selectedTime = element.textContent;
-        }
-
-        function submitBooking(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            
-            // E-Mail zusammenstellen
-            const mailtoLink = `mailto:claudiahellmig@gmail.com
-                ?subject=Neue Buchung - Senioren-Service
-                &body=Neue Terminanfrage:%0D%0A
-                %0D%0A
-                Service: ${formData.get('service')}%0D%0A
-                Datum: ${formData.get('date')}%0D%0A
-                Uhrzeit: ${selectedTime}%0D%0A
-                %0D%0A
-                Kundeninformationen:%0D%0A
-                Name: ${formData.get('name')}%0D%0A
-                Telefon: ${formData.get('phone')}%0D%0A
-                E-Mail: ${formData.get('email')}%0D%0A
-                %0D%0A
-                Bemerkungen:%0D%0A
-                ${formData.get('notes') || 'Keine Bemerkungen'}`;
-
-            window.location.href = mailtoLink;
-            alert('Vielen Dank für Ihre Anfrage! Sie werden zur E-Mail-Bestätigung weitergeleitet.');
-            event.target.reset();
-        }
-
-        function showImpressum(event) {
-            event.preventDefault();
-            document.getElementById('impressum-modal').style.display = 'block';
-        }
-
-        function showDatenschutz(event) {
-            event.preventDefault();
-            document.getElementById('datenschutz-modal').style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Schließe Modal beim Klick außerhalb
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
+        const demoTrips = [
+            {
+                id: 1,
+                from: "Hauptbahnhof",
+                to: "Elbphilharmonie",
+                duration: 18,
+                transfers: 1,
+                price: 3.7,
+                occupancy: "entspannt",
+                legs: [
+                    { mode: "U3", detail: "Richtung Schlump", time: "5 min" },
+                    { mode: "Fußweg", detail: "600 m Elbphilharmonie", time: "7 min" }
+                ],
+                co2: -42
+            },
+            {
+                id: 2,
+                from: "Altona",
+                to: "HafenCity",
+                duration: 23,
+                transfers: 0,
+                price: 2.9,
+                occupancy: "moderat",
+                legs: [
+                    { mode: "Bus 111", detail: "Richtung Baakenhöft", time: "20 min" }
+                ],
+                co2: -31
+            },
+            {
+                id: 3,
+                from: "Dammtor",
+                to: "Bergedorf",
+                duration: 28,
+                transfers: 1,
+                price: 4.2,
+                occupancy: "hoch",
+                legs: [
+                    { mode: "S21", detail: "Richtung Bergedorf", time: "24 min" },
+                    { mode: "Fußweg", detail: "400 m Zentrum", time: "4 min" }
+                ],
+                co2: -55
             }
+        ];
+
+        const ticketOptions = [
+            {
+                name: "FlexTicket 90",
+                price: "3,90 €",
+                desc: "90 Minuten hvv-Netz, inklusive Schnellbus, HVV switch Bonus." 
+            },
+            {
+                name: "Kombi+",
+                price: "5,40 €",
+                desc: "ÖPNV + 30 Min Stadtrad. Perfekt für letzte Meter." 
+            },
+            {
+                name: "Abo KlimaSmart",
+                price: "66,00 €/Monat",
+                desc: "Unbegrenzt fahren, 25% Sharing-Rabatt, Deutschlandticket-Upgrade." 
+            },
+            {
+                name: "EventPass",
+                price: "ab 8,90 €",
+                desc: "24h-Kombi inkl. HSV/FCSP Eintritt & Nacht-Shuttle." 
+            }
+        ];
+
+        const alerts = [
+            {
+                title: "U1",
+                message: "Verzögerung Richtung Ohlstedt: Signalstörung Kellinghusenstraße.",
+                time: "Live seit 3 Min"
+            },
+            {
+                title: "Fähre 73",
+                message: "Sturmwarnung – Betrieb eingeschränkt, letzte Fahrt 18:30 Uhr.",
+                time: "Update 5 Min"
+            },
+            {
+                title: "Bus 6",
+                message: "Hohe Auslastung Messehallen → bitte Folgefahrt nutzen.",
+                time: "Jetzt"
+            }
+        ];
+
+        const form = document.getElementById("journey-form");
+        const resultsContainer = document.getElementById("route-results");
+        const ticketGrid = document.getElementById("ticket-grid");
+        const alertList = document.getElementById("alert-list");
+        const historyList = document.getElementById("history-list");
+        const saveFavoriteBtn = document.getElementById("save-favorite");
+        const clearHistoryBtn = document.getElementById("clear-history");
+        const ticketSubscribeBtn = document.getElementById("ticket-subscribe");
+        const refreshAlertsBtn = document.getElementById("refresh-alerts");
+
+        const FAVORITES_KEY = "hvvplus-favorites";
+        const HISTORY_KEY = "hvvplus-history";
+
+        function renderTickets() {
+            ticketGrid.innerHTML = ticketOptions
+                .map(
+                    (ticket) => `
+                    <article class="ticket-card">
+                        <h3>${ticket.name}</h3>
+                        <strong style="font-size: 1.4rem; color: var(--accent);">${ticket.price}</strong>
+                        <p>${ticket.desc}</p>
+                        <button class="primary-btn" type="button">Jetzt buchen</button>
+                    </article>
+                `
+                )
+                .join("");
         }
 
-        // Setze minimales Datum auf heute
-        document.querySelector('input[type="date"]').min = new Date().toISOString().split('T')[0];
+        function renderAlerts() {
+            alertList.innerHTML = alerts
+                .map(
+                    (alert) => `
+                    <div class="alert">
+                        <strong>${alert.title}</strong>
+                        <span>${alert.message}</span>
+                        <small>${alert.time}</small>
+                    </div>
+                `
+                )
+                .join("");
+        }
+
+        function renderTrips(trips) {
+            if (!trips.length) {
+                resultsContainer.innerHTML = `<p style="color: rgba(226, 232, 240, 0.8);">Keine Verbindungen gefunden. Passe Start/Ziel an oder probiere eine andere Uhrzeit.</p>`;
+                return;
+            }
+
+            resultsContainer.innerHTML = trips
+                .map((trip) => {
+                    const legs = trip.legs
+                        .map(
+                            (leg) => `
+                            <div class="trip-leg">
+                                <strong>${leg.mode}</strong>
+                                <span>${leg.detail}</span>
+                                <small>${leg.time}</small>
+                            </div>
+                        `
+                        )
+                        .join("");
+
+                    return `
+                        <article class="trip-card">
+                            <header class="trip-header">
+                                <h3>${trip.from} → ${trip.to}</h3>
+                                <span>${trip.duration} min · ${trip.transfers ? `${trip.transfers} Umstieg` : "Direkt"}</span>
+                            </header>
+                            <div class="trip-body">${legs}</div>
+                            <footer class="inline-actions" style="justify-content: space-between;">
+                                <div>
+                                    <span class="chip">Preis ca. ${trip.price.toFixed(2)} €</span>
+                                    <span class="chip">CO₂ ${trip.co2}%</span>
+                                </div>
+                                <div class="occupancy">
+                                    <span></span>
+                                    <em>${trip.occupancy}</em>
+                                </div>
+                            </footer>
+                        </article>
+                    `;
+                })
+                .join("");
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+            if (!history.length) {
+                historyList.innerHTML = `<p style="color: rgba(226, 232, 240, 0.8);">Noch keine Suchanfragen.</p>`;
+                return;
+            }
+
+            historyList.innerHTML = history
+                .map(
+                    (item, index) => `
+                    <div class="history-item">
+                        <div>
+                            <strong>${item.start} → ${item.destination}</strong>
+                            <div style="color: rgba(148, 163, 184, 0.9); font-size: 0.85rem;">${item.date || "Heute"}, ${item.time || "Jetzt"}</div>
+                        </div>
+                        <button type="button" data-index="${index}">erneut</button>
+                    </div>
+                `
+                )
+                .join("");
+        }
+
+        function addToHistory(entry) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+            history.unshift(entry);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 6)));
+            loadHistory();
+        }
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const start = document.getElementById("start").value.trim();
+            const destination = document.getElementById("destination").value.trim();
+            const date = document.getElementById("date").value;
+            const time = document.getElementById("time").value;
+            const mode = document.getElementById("mobility").value;
+
+            const filteredTrips = demoTrips.filter(
+                (trip) =>
+                    trip.from.toLowerCase().includes(start.toLowerCase()) &&
+                    trip.to.toLowerCase().includes(destination.toLowerCase())
+            );
+
+            renderTrips(filteredTrips.length ? filteredTrips : demoTrips);
+            addToHistory({ start, destination, date, time, mode });
+        });
+
+        historyList.addEventListener("click", (event) => {
+            const btn = event.target.closest("button[data-index]");
+            if (!btn) return;
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+            const item = history[Number(btn.dataset.index)];
+            if (!item) return;
+            document.getElementById("start").value = item.start;
+            document.getElementById("destination").value = item.destination;
+            document.getElementById("date").value = item.date;
+            document.getElementById("time").value = item.time;
+            document.getElementById("mobility").value = item.mode;
+            form.dispatchEvent(new Event("submit"));
+        });
+
+        clearHistoryBtn.addEventListener("click", () => {
+            localStorage.removeItem(HISTORY_KEY);
+            loadHistory();
+        });
+
+        saveFavoriteBtn.addEventListener("click", () => {
+            const favorite = {
+                start: document.getElementById("start").value.trim() || "Hauptbahnhof",
+                destination: document.getElementById("destination").value.trim() || "Jungfernstieg",
+                timestamp: new Date().toISOString()
+            };
+            const favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+            favorites.unshift(favorite);
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites.slice(0, 3)));
+            saveFavoriteBtn.textContent = "✓ gespeichert";
+            setTimeout(() => (saveFavoriteBtn.textContent = "⭐ Favorit speichern"), 1800);
+        });
+
+        ticketSubscribeBtn.addEventListener("click", () => {
+            alert("Abo-Vergleich öffnet sich im echten Produkt in einem Modal mit persönlichen Spartipps.");
+        });
+
+        refreshAlertsBtn.addEventListener("click", () => {
+            alert("Echtzeitdaten würden hier neu geladen. (Demo)");
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("date").value = today;
+            renderTickets();
+            renderAlerts();
+            loadHistory();
+            renderTrips(demoTrips);
+        });
     </script>
 </body>
 </html>
