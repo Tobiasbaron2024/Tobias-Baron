@@ -1,402 +1,906 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Senioren-Service - Arztbegleitung und Einkaufshilfe">
-    <title>Martins Senioren-Service</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pizzateig Planer</title>
+    <meta
+      name="description"
+      content="Plane deinen perfekten Pizzateig mit Hydratation, Salz und Fermentationszeit."
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --primary: #2C5282;
-            --secondary: #4299E1;
-            --success: #48BB78;
-            --background: #F7FAFC;
-            --text: #2D3748;
-        }
+      :root {
+        color-scheme: light;
+        --bg: #faf9f6;
+        --card: #ffffff;
+        --accent: #f97316;
+        --accent-dark: #ea580c;
+        --accent-soft: rgba(249, 115, 22, 0.15);
+        --text: #1f2933;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        font-size: clamp(15px, 0.95vw + 0.8rem, 17px);
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            background: var(--background);
-            font-size: 16px;
-        }
+      body {
+        margin: 0;
+        font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
 
-        .app-header {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 0.75rem;
+      }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
+      p {
+        margin: 0 0 0.75rem;
+      }
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+      .layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: clamp(1.25rem, 2vw, 2rem);
+        display: grid;
+        gap: 1.5rem;
+      }
 
-        .button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            width: 100%;
-            cursor: pointer;
-            transition: 0.3s;
+      @media (min-width: 1100px) {
+        .layout {
+          grid-template-columns: 430px 1fr;
+          align-items: start;
         }
+      }
 
-        .button:hover {
-            background: var(--secondary);
-        }
+      form,
+      .card,
+      .preview-wrapper {
+        background: var(--card);
+        border-radius: 1.1rem;
+        padding: clamp(1.25rem, 2vw, 1.75rem);
+        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+        border: 1px solid rgba(15, 23, 42, 0.05);
+      }
 
-        .price-list {
-            list-style: none;
-        }
+      form h1 {
+        font-size: clamp(1.75rem, 2.4vw, 2.3rem);
+        margin-bottom: 0.25rem;
+      }
 
-        .price-list li {
-            padding: 1rem;
-            border-bottom: 1px solid #edf2f7;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      form > p {
+        color: var(--muted);
+        margin-bottom: 1.75rem;
+      }
 
-        .price-tag {
-            font-weight: bold;
-            color: var(--primary);
-        }
+      fieldset {
+        border: none;
+        margin: 0 0 1.5rem;
+        padding: 0;
+      }
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+      fieldset legend {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+      }
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
+      label {
+        display: block;
+        margin-bottom: 1.05rem;
+      }
 
-        .form-input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
+      label span {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+      }
 
-        .time-slots {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
+      label small {
+        color: var(--muted);
+        font-weight: 500;
+      }
 
-        .time-slot {
-            padding: 0.8rem;
-            text-align: center;
-            background: #edf2f7;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        font-family: inherit;
+        font-size: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--border);
+        padding: 0.75rem 0.9rem;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
 
-        .time-slot.selected {
-            background: var(--primary);
-            color: white;
-        }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
 
-        .nav-menu {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 0.8rem;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        }
+      input[type="range"] {
+        padding: 0;
+        appearance: none;
+        height: 4px;
+        border-radius: 999px;
+        background: linear-gradient(
+          to right,
+          var(--accent) var(--percent, 50%),
+          #e2e8f0 var(--percent, 50%)
+        );
+      }
 
-        .nav-item {
-            text-decoration: none;
-            color: var(--text);
-            text-align: center;
-            font-size: 0.9rem;
-        }
+      input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+      }
 
-        .nav-item.active {
-            color: var(--primary);
-        }
+      .inline-inputs {
+        display: grid;
+        gap: 0.85rem;
+      }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
+      @media (min-width: 680px) {
+        .inline-inputs {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+      }
 
-        .modal-content {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            max-width: 500px;
-            margin: 2rem auto;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
+      .dual-inline {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
 
-        .close-button {
-            float: right;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
+      .section-subtitle {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin-bottom: 0.75rem;
+      }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 0.5rem;
-            }
-            
-            .card {
-                border-radius: 8px;
-                padding: 1rem;
-            }
-        }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        border: none;
+        border-radius: 999px;
+        padding: 0.85rem 1.4rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 24px rgba(249, 115, 22, 0.25);
+        background: var(--accent-dark);
+      }
+
+      .btn.secondary {
+        background: #f8fafc;
+        color: var(--text);
+        border: 1px solid var(--border);
+        box-shadow: none;
+      }
+
+      .btn.secondary:hover {
+        background: #f1f5f9;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .preview-wrapper {
+        padding: clamp(1.25rem, 1.8vw, 1.75rem);
+      }
+
+      .preview-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        background: #fffdfa;
+        border-radius: 0.75rem;
+        padding: 2.2rem 2.6rem;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
+        color: #1b1f24;
+      }
+
+      .preview-header {
+        text-align: center;
+        margin-bottom: 1.75rem;
+      }
+
+      .preview-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        border-radius: 999px;
+        padding: 0.3rem 0.75rem;
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.4rem;
+      }
+
+      th,
+      td {
+        padding: 0.55rem 0.4rem;
+        text-align: left;
+      }
+
+      thead th {
+        border-bottom: 2px solid rgba(15, 23, 42, 0.1);
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        color: #475569;
+      }
+
+      tbody tr + tr td {
+        border-top: 1px solid rgba(15, 23, 42, 0.08);
+      }
+
+      .timeline {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        border-left: 2px dashed rgba(15, 23, 42, 0.1);
+      }
+
+      .timeline li {
+        padding-left: 1.25rem;
+        margin-left: 0.75rem;
+        position: relative;
+        margin-bottom: 1.25rem;
+      }
+
+      .timeline li::before {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        left: -6px;
+        top: 0.2rem;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+      }
+
+      .timeline strong {
+        display: block;
+        font-size: 0.95rem;
+      }
+
+      textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+
+      .photo-preview {
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-top: 1rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.15);
+      }
+
+      .photo-preview img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .tips {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      .tip-item {
+        padding: 0.85rem 0.9rem;
+        border-radius: 0.9rem;
+        background: rgba(15, 23, 42, 0.03);
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
     </style>
-</head>
-<body>
-    <header class="app-header">
-        <h1>Martins Senioren-Service</h1>
-        <p>Ihre Unterstützung im Alltag</p>
-    </header>
+  </head>
+  <body>
+    <div id="root"></div>
 
-    <div class="container">
-        <!-- Servicezeiten -->
-        <div class="card">
-            <h2>Unsere Servicezeiten</h2>
-            <ul class="price-list">
-                <li>
-                    <span>Montag - Samstag</span>
-                    <span>ab 18:00 Uhr</span>
-                </li>
-                <li>
-                    <span>Sonntag</span>
-                    <span>nach Absprache</span>
-                </li>
-            </ul>
-        </div>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-        <!-- Preise -->
-        <div class="card">
-            <h2>Unsere Leistungen</h2>
-            <ul class="price-list">
-                <li>
-                    <span>Arzt-Begleitservice</span>
-                    <span class="price-tag">22€/Stunde</span>
-                </li>
-                <li>
-                    <span>Einkaufsservice</span>
-                    <span class="price-tag">20€/Stunde</span>
-                </li>
-                <li>
-                    <span>Express-Service</span>
-                    <span class="price-tag">+5€/Stunde</span>
-                </li>
-                <li>
-                    <span>Wochenend-Zuschlag</span>
-                    <span class="price-tag">+5€/Stunde</span>
-                </li>
-            </ul>
-        </div>
+    <script type="text/babel">
+      const { useState, useEffect, useMemo, useRef } = React;
+      const { jsPDF } = window.jspdf;
 
-        <!-- Buchungsformular -->
-        <div class="card" id="booking-section">
-            <h2>Termin buchen</h2>
-            <form id="booking-form" onsubmit="submitBooking(event)">
-                <div class="form-group">
-                    <label class="form-label">Service auswählen:</label>
-                    <select class="form-input" name="service" required>
-                        <option value="">Bitte wählen...</option>
-                        <option value="arzt">Arzt-Begleitservice</option>
-                        <option value="einkauf">Einkaufsservice</option>
+      const STORAGE_KEY = "pizza_teig_app_v1";
+      const DIN_A4_WIDTH = 210; // mm
+
+      const yeastPresets = {
+        frisch: { label: "Frischhefe", percent: 0.2 },
+        trocken: { label: "Trockenhefe", percent: 0.07 },
+        wenig: { label: "Langzeit (kalt)", percent: 0.05 },
+      };
+
+      const todayISO = new Date().toISOString().split("T")[0];
+
+      const defaultState = {
+        name: "Pizzateig Meisterplan",
+        pizzas: 4,
+        weightPerPizza: 250,
+        hydration: 65,
+        salt: 2.5,
+        oil: 1.5,
+        yeastType: "frisch",
+        yeastPercent: yeastPresets.frisch.percent,
+        startDate: todayISO,
+        startTime: "18:00",
+        bulkHours: 12,
+        proofHours: 2,
+        temperature: 22,
+        notes: "",
+        photoUrl: null,
+      };
+
+      function formatNumber(value) {
+        return new Intl.NumberFormat("de-DE", {
+          minimumFractionDigits: value < 10 ? 1 : 0,
+          maximumFractionDigits: 1,
+        }).format(value);
+      }
+
+      function parseFloatSafe(value, fallback = 0) {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      }
+
+      function updateRangeBackground(rangeElement, value, min = 0, max = 100) {
+        const percent = ((value - min) / (max - min)) * 100;
+        if (rangeElement && rangeElement.style) {
+          rangeElement.style.setProperty("--percent", percent + "%");
+        }
+      }
+
+      function calculateIngredients(state) {
+        const totalWeight = state.pizzas * state.weightPerPizza;
+        const flour =
+          totalWeight /
+          (1 + state.hydration / 100 + state.salt / 100 + state.oil / 100 + state.yeastPercent / 100);
+        return {
+          totalWeight,
+          flour,
+          water: flour * (state.hydration / 100),
+          salt: flour * (state.salt / 100),
+          oil: flour * (state.oil / 100),
+          yeast: flour * (state.yeastPercent / 100),
+        };
+      }
+
+      function buildTimeline(state) {
+        if (!state.startDate) return [];
+        const base = new Date(`${state.startDate}T${state.startTime || "08:00"}`);
+        if (Number.isNaN(base.getTime())) return [];
+
+        const steps = [
+          {
+            title: "Autolyse & Mischen",
+            time: base,
+            description: "Mehl und Wasser mischen, 30 Minuten ruhen lassen. Danach Salz, Öl und Hefe einarbeiten.",
+          },
+          {
+            title: "Stockgare",
+            time: new Date(base.getTime() + state.bulkHours * 60 * 60 * 1000),
+            description: `${state.bulkHours} Std. bei ca. ${state.temperature}°C. Alle 30–45 Min. dehnen & falten.`,
+          },
+        ];
+
+        const afterBulk = steps[1].time;
+        const ballTime = new Date(afterBulk.getTime());
+        steps.push({
+          title: "Teiglinge formen",
+          time: ballTime,
+          description: "Teig portionieren, zu Kugeln schleifen und in geölte Box legen.",
+        });
+
+        const proofEnd = new Date(ballTime.getTime() + state.proofHours * 60 * 60 * 1000);
+        steps.push({
+          title: "Stückgare",
+          time: proofEnd,
+          description: `${state.proofHours} Std. ruhen lassen. Anschließend ausziehen und belegen.`,
+        });
+
+        steps.push({
+          title: "Backen",
+          time: proofEnd,
+          description: "Ofen/Stein 45 Minuten vorheizen. Backzeit pro Pizza: 90–120 Sekunden bei 400°C oder 6–7 Min. bei 250°C.",
+        });
+
+        return steps;
+      }
+
+      function formatDateTime(date) {
+        if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "Zeitpunkt folgt";
+        return new Intl.DateTimeFormat("de-DE", {
+          weekday: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+        }).format(date);
+      }
+
+      function PizzaTeigApp() {
+        const [state, setState] = useState(() => {
+          try {
+            const cached = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            if (!cached) return defaultState;
+            return { ...defaultState, ...cached };
+          } catch (error) {
+            console.warn("Konnte gespeicherte Daten nicht laden", error);
+            return defaultState;
+          }
+        });
+
+        const previewRef = useRef(null);
+        const hydrationRef = useRef(null);
+        const saltRef = useRef(null);
+        const oilRef = useRef(null);
+
+        useEffect(() => {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }, [state]);
+
+        useEffect(() => {
+          updateRangeBackground(hydrationRef.current, state.hydration, 50, 80);
+          updateRangeBackground(saltRef.current, state.salt, 1, 4);
+          updateRangeBackground(oilRef.current, state.oil, 0, 5);
+        }, [state.hydration, state.salt, state.oil]);
+
+        const ingredients = useMemo(() => calculateIngredients(state), [state]);
+        const timeline = useMemo(() => buildTimeline(state), [state]);
+
+        const hydrationRatio = state.hydration;
+
+        const handleChange = (key, parser = (value) => value) => (event) => {
+          const value = parser(event.target.value);
+          setState((prev) => ({ ...prev, [key]: value }));
+        };
+
+        const handleYeastTypeChange = (event) => {
+          const type = event.target.value;
+          const preset = yeastPresets[type];
+          setState((prev) => ({
+            ...prev,
+            yeastType: type,
+            yeastPercent: preset ? preset.percent : prev.yeastPercent,
+          }));
+        };
+
+        const handlePhotoUpload = (event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => setState((prev) => ({ ...prev, photoUrl: ev.target.result }));
+          reader.readAsDataURL(file);
+        };
+
+        const resetForm = () => setState(defaultState);
+
+        const handleGeneratePdf = async () => {
+          if (!previewRef.current) return;
+          const canvas = await html2canvas(previewRef.current, { scale: 2, useCORS: true });
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfWidth = DIN_A4_WIDTH;
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+          const filename = `${state.name.replace(/\s+/g, "_")}_${state.pizzas}x${state.weightPerPizza}.pdf`;
+          pdf.save(filename);
+        };
+
+        const yeastInfo = useMemo(() => {
+          const type = yeastPresets[state.yeastType];
+          return type ? type.label : "Hefe";
+        }, [state.yeastType]);
+
+        return (
+          <div className="layout">
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleGeneratePdf();
+              }}
+            >
+              <h1>Pizzateig Planer</h1>
+              <p>
+                Finde die perfekten Mengen und den optimalen Zeitplan für deinen nächsten Pizza-Abend.
+                Werte lassen sich speichern und als PDF exportieren.
+              </p>
+
+              <fieldset>
+                <legend>Grunddaten</legend>
+                <label>
+                  <span>
+                    Name des Teigs
+                    <small>{state.pizzas} Pizzen à {state.weightPerPizza} g</small>
+                  </span>
+                  <input
+                    value={state.name}
+                    onChange={handleChange("name")}
+                    placeholder="z. B. Wochenendteig"
+                  />
+                </label>
+
+                <div className="inline-inputs">
+                  <label>
+                    <span>
+                      Anzahl Pizzen
+                      <small>1 – 12</small>
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="12"
+                      value={state.pizzas}
+                      onChange={handleChange("pizzas", (value) => Math.max(1, parseInt(value, 10) || 1))}
+                    />
+                  </label>
+
+                  <label>
+                    <span>
+                      Teiggewicht pro Pizza (g)
+                      <small>180 – 320 g</small>
+                    </span>
+                    <input
+                      type="number"
+                      min="150"
+                      max="400"
+                      value={state.weightPerPizza}
+                      onChange={handleChange(
+                        "weightPerPizza",
+                        (value) => Math.min(400, Math.max(150, parseInt(value, 10) || defaultState.weightPerPizza))
+                      )}
+                    />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Hydration & Würze</legend>
+                <label>
+                  <span>
+                    Hydration ({formatNumber(hydrationRatio)} %)
+                    <small>Wasser</small>
+                  </span>
+                  <input
+                    ref={hydrationRef}
+                    type="range"
+                    min="50"
+                    max="80"
+                    step="0.5"
+                    value={state.hydration}
+                    onChange={handleChange("hydration", (value) => parseFloatSafe(value, defaultState.hydration))}
+                  />
+                </label>
+
+                <div className="dual-inline">
+                  <label>
+                    <span>
+                      Salz ({formatNumber(state.salt)} %)
+                      <small>Geschmack & Struktur</small>
+                    </span>
+                    <input
+                      ref={saltRef}
+                      type="range"
+                      min="1"
+                      max="4"
+                      step="0.1"
+                      value={state.salt}
+                      onChange={handleChange("salt", (value) => parseFloatSafe(value, defaultState.salt))}
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      Öl ({formatNumber(state.oil)} %)
+                      <small>Optional für mehr Elastizität</small>
+                    </span>
+                    <input
+                      ref={oilRef}
+                      type="range"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={state.oil}
+                      onChange={handleChange("oil", (value) => parseFloatSafe(value, defaultState.oil))}
+                    />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Hefe & Gärung</legend>
+                <div className="inline-inputs">
+                  <label>
+                    <span>Hefetyp</span>
+                    <select value={state.yeastType} onChange={handleYeastTypeChange}>
+                      {Object.entries(yeastPresets).map(([value, config]) => (
+                        <option key={value} value={value}>
+                          {config.label}
+                        </option>
+                      ))}
+                      <option value="custom">Eigene Angabe</option>
                     </select>
+                  </label>
+                  <label>
+                    <span>
+                      Hefemenge (% auf Mehl)
+                      <small>{yeastInfo}</small>
+                    </span>
+                    <input
+                      type="number"
+                      min="0.01"
+                      max="3"
+                      step="0.01"
+                      value={state.yeastPercent}
+                      onChange={handleChange("yeastPercent", (value) => parseFloatSafe(value, defaultState.yeastPercent))}
+                    />
+                  </label>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Datum:</label>
-                    <input type="date" class="form-input" name="date" required>
+                <div className="inline-inputs">
+                  <label>
+                    <span>
+                      Startdatum
+                      <small>Bedeutend für Zeitplan</small>
+                    </span>
+                    <input type="date" value={state.startDate} onChange={handleChange("startDate")} />
+                  </label>
+                  <label>
+                    <span>Startzeit</span>
+                    <input type="time" value={state.startTime} onChange={handleChange("startTime")} />
+                  </label>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Verfügbare Zeiten:</label>
-                    <div class="time-slots">
-                        <div class="time-slot" onclick="selectTime(this)">18:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">19:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">20:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">21:00</div>
-                        <div class="time-slot" onclick="selectTime(this)">22:00</div>
-                    </div>
+                <div className="inline-inputs">
+                  <label>
+                    <span>
+                      Stockgare (Std.)
+                      <small>Teig im Ganzen</small>
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="48"
+                      step="0.5"
+                      value={state.bulkHours}
+                      onChange={handleChange("bulkHours", (value) => parseFloatSafe(value, defaultState.bulkHours))}
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      Stückgare (Std.)
+                      <small>Teiglinge entspannen</small>
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="12"
+                      step="0.5"
+                      value={state.proofHours}
+                      onChange={handleChange("proofHours", (value) => parseFloatSafe(value, defaultState.proofHours))}
+                    />
+                  </label>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Name:</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
+                <label>
+                  <span>
+                    Umgebungstemperatur (°C)
+                    <small>je kühler, desto längere Gare</small>
+                  </span>
+                  <input
+                    type="number"
+                    min="4"
+                    max="35"
+                    step="0.5"
+                    value={state.temperature}
+                    onChange={handleChange("temperature", (value) => parseFloatSafe(value, defaultState.temperature))}
+                  />
+                </label>
+              </fieldset>
 
-                <div class="form-group">
-                    <label class="form-label">Telefon:</label>
-                    <input type="tel" class="form-input" name="phone" required>
-                </div>
+              <fieldset>
+                <legend>Notizen & Foto</legend>
+                <label>
+                  <span>Eigene Hinweise</span>
+                  <textarea
+                    value={state.notes}
+                    placeholder="z. B. Lieblings-Topping, gewünschte Backtemperatur, Besonderheiten"
+                    onChange={handleChange("notes")}
+                  />
+                </label>
+                <label>
+                  <span>Inspirationsfoto hochladen</span>
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} />
+                </label>
+              </fieldset>
 
-                <div class="form-group">
-                    <label class="form-label">E-Mail:</label>
-                    <input type="email" class="form-input" name="email" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Bemerkungen:</label>
-                    <textarea class="form-input" name="notes" rows="3"></textarea>
-                </div>
-
-                <button type="submit" class="button">Termin anfragen</button>
+              <div className="actions">
+                <button type="submit" className="btn">
+                  📄 PDF exportieren
+                </button>
+                <button type="button" className="btn secondary" onClick={resetForm}>
+                  🔄 Zurücksetzen
+                </button>
+              </div>
             </form>
-        </div>
 
-        <!-- Kontakt -->
-        <div class="card">
-            <h2>Direktkontakt</h2>
-            <a href="tel:0123456789" class="button" style="text-decoration: none; text-align: center; display: block; margin-top: 1rem;">
-                📞 0123 - 456789
-            </a>
-        </div>
+            <div className="preview-wrapper">
+              <div className="preview-page" ref={previewRef}>
+                <div className="preview-header">
+                  <span className="tag">Pizzateig Report</span>
+                  <h2>{state.name}</h2>
+                  <p className="muted">
+                    {state.pizzas} Pizzen · je {formatNumber(state.weightPerPizza)} g · Hydration {formatNumber(
+                      hydrationRatio
+                    )}%
+                  </p>
+                </div>
 
-        <!-- Footer Links -->
-        <div style="text-align: center; margin: 2rem 0;">
-            <a href="#" onclick="showImpressum(event)">Impressum</a> |
-            <a href="#" onclick="showDatenschutz(event)">Datenschutz</a>
-        </div>
-    </div>
+                <section>
+                  <h3>Zutatenübersicht</h3>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Zutat</th>
+                        <th>Menge</th>
+                        <th>Bäcker-Prozent</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Mehl (Tipo 00 / W 550)</td>
+                        <td>{formatNumber(ingredients.flour)} g</td>
+                        <td>100%</td>
+                      </tr>
+                      <tr>
+                        <td>Wasser</td>
+                        <td>{formatNumber(ingredients.water)} g</td>
+                        <td>{formatNumber(state.hydration)}%</td>
+                      </tr>
+                      <tr>
+                        <td>Salz (fein)</td>
+                        <td>{formatNumber(ingredients.salt)} g</td>
+                        <td>{formatNumber(state.salt)}%</td>
+                      </tr>
+                      <tr>
+                        <td>Olivenöl</td>
+                        <td>{formatNumber(ingredients.oil)} g</td>
+                        <td>{formatNumber(state.oil)}%</td>
+                      </tr>
+                      <tr>
+                        <td>{yeastInfo}</td>
+                        <td>{formatNumber(ingredients.yeast)} g</td>
+                        <td>{formatNumber(state.yeastPercent)}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p className="muted">
+                    Gesamtteig: {formatNumber(ingredients.totalWeight)} g · Übrige Teiglinge lassen sich 24 h
+                    im Kühlschrank lagern.
+                  </p>
+                </section>
 
-    <!-- Navigation -->
-    <nav class="nav-menu">
-        <a href="#" class="nav-item active">
-            🏠<br>Start
-        </a>
-        <a href="#booking-section" class="nav-item">
-            📅<br>Buchen
-        </a>
-        <a href="tel:0123456789" class="nav-item">
-            📞<br>Anrufen
-        </a>
-    </nav>
+                <section>
+                  <h3>Fermentationsplan</h3>
+                  {timeline.length > 0 ? (
+                    <ul className="timeline">
+                      {timeline.map((step, index) => (
+                        <li key={index}>
+                          <strong>{step.title}</strong>
+                          <div className="muted">{formatDateTime(step.time)}</div>
+                          <p>{step.description}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>Bitte Startdatum und -zeit wählen, um einen Zeitplan zu generieren.</p>
+                  )}
+                </section>
 
-    <!-- Impressum Modal -->
-    <div id="impressum-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-button" onclick="closeModal('impressum-modal')">&times;</button>
-            <h2>Impressum</h2>
-            <p>Martins Senioren-Service</p>
-            <p>Inhaberin: Claudia Hellmig</p>
-            <p>[Ihre Adresse]</p>
-            <p>Telefon: 0123 - 456789</p>
-            <p>E-Mail: claudiahellmig@gmail.com</p>
-        </div>
-    </div>
+                {state.notes && (
+                  <section>
+                    <h3>Notizen</h3>
+                    <p style={{ whiteSpace: "pre-wrap" }}>{state.notes}</p>
+                  </section>
+                )}
 
-    <!-- Datenschutz Modal -->
-    <div id="datenschutz-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-button" onclick="closeModal('datenschutz-modal')">&times;</button>
-            <h2>Datenschutzerklärung</h2>
-            <p>Ihre Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet und nicht an Dritte weitergegeben.</p>
-            <!-- Hier können Sie eine ausführlichere Datenschutzerklärung einfügen -->
-        </div>
-    </div>
+                <section>
+                  <h3>Profi-Tipps</h3>
+                  <div className="tips">
+                    <div className="tip-item">
+                      • Kalte Stockgare (5–8°C) für 24–48 Stunden bringt Süße und komplexe Aromen.
+                    </div>
+                    <div className="tip-item">
+                      • Öffne die Teiglinge erst kurz vor dem Backen – so bleiben sie fluffig und trocknen nicht aus.
+                    </div>
+                    <div className="tip-item">
+                      • Backstahl oder Stein 45 Minuten aufheizen und Pizza in maximal 2 Minuten ausbacken.
+                    </div>
+                  </div>
+                </section>
 
-    <script>
-        let selectedTime = null;
+                {state.photoUrl && (
+                  <div className="photo-preview">
+                    <img src={state.photoUrl} alt="Pizza Inspiration" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
 
-        function selectTime(element) {
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            element.classList.add('selected');
-            selectedTime = element.textContent;
-        }
-
-        function submitBooking(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            
-            // E-Mail zusammenstellen
-            const mailtoLink = `mailto:claudiahellmig@gmail.com
-                ?subject=Neue Buchung - Senioren-Service
-                &body=Neue Terminanfrage:%0D%0A
-                %0D%0A
-                Service: ${formData.get('service')}%0D%0A
-                Datum: ${formData.get('date')}%0D%0A
-                Uhrzeit: ${selectedTime}%0D%0A
-                %0D%0A
-                Kundeninformationen:%0D%0A
-                Name: ${formData.get('name')}%0D%0A
-                Telefon: ${formData.get('phone')}%0D%0A
-                E-Mail: ${formData.get('email')}%0D%0A
-                %0D%0A
-                Bemerkungen:%0D%0A
-                ${formData.get('notes') || 'Keine Bemerkungen'}`;
-
-            window.location.href = mailtoLink;
-            alert('Vielen Dank für Ihre Anfrage! Sie werden zur E-Mail-Bestätigung weitergeleitet.');
-            event.target.reset();
-        }
-
-        function showImpressum(event) {
-            event.preventDefault();
-            document.getElementById('impressum-modal').style.display = 'block';
-        }
-
-        function showDatenschutz(event) {
-            event.preventDefault();
-            document.getElementById('datenschutz-modal').style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Schließe Modal beim Klick außerhalb
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
-
-        // Setze minimales Datum auf heute
-        document.querySelector('input[type="date"]').min = new Date().toISOString().split('T')[0];
+      ReactDOM.createRoot(document.getElementById("root")).render(<PizzaTeigApp />);
     </script>
-</body>
+  </body>
 </html>
