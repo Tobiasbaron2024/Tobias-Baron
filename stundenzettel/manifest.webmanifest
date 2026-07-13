@@ -1,0 +1,13 @@
+{
+  "name": "Stundenzettel Sicherheit",
+  "short_name": "Stundenzettel",
+  "description": "Automatischer Stundenzettel für den Sicherheitsdienst in Hamburg",
+  "lang": "de-DE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f7fb",
+  "theme_color": "#17365d",
+  "icons": []
+}
