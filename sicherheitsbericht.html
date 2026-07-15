@@ -192,6 +192,8 @@
               return `Beinahe-Ereignis am ${date || "____"} um ${time || "____"} Uhr, Ort: ${location || "____"}.\nWas beinahe passiert wäre: ${description || "____"}\nVorbeugende Maßnahmen: ______________________________`;
             case "Dienstübergabe":
               return `Dienstübergabe am ${date || "____"} um ${time || "____"} Uhr.\nOrt/Posten: ${location || "____"}\nBesondere Vorkommnisse: ${description || "____"}`;
+            case "Regel-Check":
+              return description || "Bitte den Regel-Check-Text ergänzen.";
             default:
               return description || "—";
           }
@@ -216,6 +218,7 @@
                   <option>Schadensmeldung</option>
                   <option>Beinahe-Unfall</option>
                   <option>Dienstübergabe</option>
+                  <option>Regel-Check</option>
                 </select>
               </label>
 
@@ -223,11 +226,21 @@
               <div style={{ display: "flex", gap: "0.75rem" }}>
                 <label style={{ flex: 1 }}>
                   <span>Datum</span>
-                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required={reportType !== "Regel-Check"}
+                  />
                 </label>
                 <label style={{ flex: 1 }}>
                   <span>Uhrzeit</span>
-                  <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
+                  <input
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    required={reportType !== "Regel-Check"}
+                  />
                 </label>
               </div>
 
@@ -238,7 +251,7 @@
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="z. B. Werkstor A"
-                  required
+                  required={reportType !== "Regel-Check"}
                 />
               </label>
 
@@ -249,7 +262,11 @@
                   rows="6"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Was genau ist passiert?"
+                  placeholder={
+                    reportType === "Regel-Check"
+                      ? "Hier den vollständigen Regel-Check einfügen"
+                      : "Was genau ist passiert?"
+                  }
                 ></textarea>
               </label>
 
