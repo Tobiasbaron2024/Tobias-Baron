@@ -1,0 +1,41 @@
+name: DienstWache auf GitHub Pages veröffentlichen
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "sicherheitsdienst-app/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v6
+
+      - name: GitHub Pages vorbereiten
+        uses: actions/configure-pages@v5
+
+      - name: DienstWache hochladen
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: "./sicherheitsdienst-app"
+
+      - name: Veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4
