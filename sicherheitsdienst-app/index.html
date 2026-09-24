@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>DienstWache</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg">
+<link rel="stylesheet" href="./styles.css">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<section id="authView" class="auth-shell">
+  <div class="brand-card">
+    <img src="./icon.svg" class="brand-logo" alt="">
+    <div><h1>DienstWache</h1><p>Dienstzeiten, Urlaub und Meldungen an einem Ort.</p></div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="tab active" data-auth-tab="login">Anmelden</button>
+      <button class="tab" data-auth-tab="register">Registrieren</button>
+    </div>
+    <form id="loginForm" class="auth-form">
+      <label>E-Mail<input id="loginEmail" type="email" required></label>
+      <label>Passwort<input id="loginPassword" type="password" minlength="6" required></label>
+      <button class="primary" type="submit">Anmelden</button>
+      <button class="link-btn" id="forgotPassword" type="button">Passwort vergessen</button>
+    </form>
+    <form id="registerForm" class="auth-form hidden">
+      <div class="grid2">
+        <label>Vorname<input id="regFirstName" required></label>
+        <label>Nachname<input id="regLastName" required></label>
+      </div>
+      <label>E-Mail<input id="regEmail" type="email" required></label>
+      <label>Passwort<input id="regPassword" type="password" minlength="8" required></label>
+      <button class="primary" type="submit">3 Tage kostenlos testen</button>
+      <p class="muted small">Danach ist ein Abo für 2,99 € pro Monat vorgesehen.</p>
+    </form>
+  </div>
+</section>
+
+<section id="appView" class="app-shell hidden">
+  <header class="topbar">
+    <div class="brand-mini"><img src="./icon.svg" alt=""><div><strong>DienstWache</strong><span id="userEmail"></span></div></div>
+    <div class="top-actions">
+      <span id="trialBadge" class="badge"></span>
+      <button id="installBtn" class="ghost hidden">Installieren</button>
+      <button id="logoutBtn" class="ghost">Abmelden</button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <button class="nav active" data-page="dashboard">Übersicht</button>
+    <button class="nav" data-page="shifts">Dienstzeiten</button>
+    <button class="nav" data-page="vacation">Urlaub</button>
+    <button class="nav" data-page="incidents">Meldungen</button>
+    <button class="nav" data-page="reports">Berichte</button>
+    <button class="nav" data-page="profile">Profil</button>
+  </aside>
+
+  <main class="main">
+    <div id="expiredPanel" class="expired hidden">
+      <h2>Testphase beendet</h2>
+      <p>Deine Daten bleiben gespeichert. Die Arbeitsfunktionen sind gesperrt, bis ein Abo aktiviert wird.</p>
+      <div class="price">2,99 € <span>/ Monat</span></div>
+      <button id="subscribeBtn" class="primary">Abo aktivieren</button>
+      <p class="muted small">Der Zahlungsanbieter ist noch nicht verbunden.</p>
+    </div>
+
+    <section id="page-dashboard" class="page active">
+      <div class="page-head"><div><h2>Übersicht</h2><p>Dein aktueller Monat auf einen Blick.</p></div></div>
+      <div id="dashboardCards" class="cards"></div>
+      <div class="panel"><h3>Nächste Termine</h3><div id="nextItems" class="list"></div></div>
+    </section>
+
+    <section id="page-shifts" class="page">
+      <div class="page-head"><div><h2>Dienstzeiten</h2><p>Schichten erfassen und Stunden automatisch berechnen.</p></div></div>
+      <div class="split">
+        <form id="shiftForm" class="panel form-grid">
+          <h3>Neue Schicht</h3>
+          <label>Datum<input id="shiftDate" type="date" required></label>
+          <div class="grid2"><label>Beginn<input id="shiftStart" type="time" required></label><label>Ende<input id="shiftEnd" type="time" required></label></div>
+          <label>Pause in Minuten<input id="shiftBreak" type="number" min="0" max="1440" value="0"></label>
+          <label>Objekt<input id="shiftSite"></label>
+          <label>Notiz<textarea id="shiftNote" rows="3"></textarea></label>
+          <button class="primary" type="submit">Schicht speichern</button>
+        </form>
+        <div class="panel"><h3>Letzte Schichten</h3><div id="shiftList" class="list"></div></div>
+      </div>
+    </section>
+
+    <section id="page-vacation" class="page">
+      <div class="page-head"><div><h2>Urlaub</h2><p>Urlaubstage planen und Resturlaub sehen.</p></div></div>
+      <div class="split">
+        <form id="vacationForm" class="panel form-grid">
+          <h3>Urlaub eintragen</h3>
+          <label>Von<input id="vacStart" type="date" required></label>
+          <label>Bis<input id="vacEnd" type="date" required></label>
+          <label>Urlaubstage<input id="vacDays" type="number" min="0.5" step="0.5" required></label>
+          <label>Status<select id="vacStatus"><option value="planned">Geplant</option><option value="requested">Beantragt</option><option value="approved">Genehmigt</option><option value="taken">Genommen</option></select></label>
+          <label>Notiz<textarea id="vacNote" rows="3"></textarea></label>
+          <button class="primary" type="submit">Urlaub speichern</button>
+        </form>
+        <div class="panel"><h3>Urlaubsübersicht</h3><div id="vacationList" class="list"></div></div>
+      </div>
+    </section>
+
+    <section id="page-incidents" class="page">
+      <div class="page-head"><div><h2>Meldungen</h2><p>Vorfälle und Schäden dokumentieren.</p></div></div>
+      <div class="split">
+        <form id="incidentForm" class="panel form-grid">
+          <h3>Neue Meldung</h3>
+          <label>Kategorie<select id="incidentCategory"><option value="damage">Schaden</option><option value="burglary">Einbruch</option><option value="theft">Diebstahl</option><option value="fire">Brand</option><option value="medical">Medizinischer Notfall</option><option value="alarm">Alarm</option><option value="technical_fault">Technische Störung</option><option value="access_issue">Zutritt</option><option value="violence">Gewalt</option><option value="other">Sonstiges</option></select></label>
+          <label>Titel<input id="incidentTitle" required></label>
+          <label>Ort<input id="incidentLocation"></label>
+          <label>Priorität<select id="incidentSeverity"><option value="low">Niedrig</option><option value="normal" selected>Normal</option><option value="high">Hoch</option><option value="critical">Kritisch</option></select></label>
+          <label>Beschreibung<textarea id="incidentDescription" rows="6" required></textarea></label>
+          <label>Foto / PDF<input id="incidentFile" type="file" accept="image/*,.pdf"></label>
+          <button class="primary" type="submit">Meldung speichern</button>
+        </form>
+        <div class="panel"><h3>Letzte Meldungen</h3><div id="incidentList" class="list"></div></div>
+      </div>
+    </section>
+
+    <section id="page-reports" class="page">
+      <div class="page-head"><div><h2>Berichte</h2><p>Stundennachweis als PDF erstellen und teilen.</p></div></div>
+      <div class="panel">
+        <h3>Aktueller Monat</h3>
+        <div class="actions"><button id="downloadTimesheet" class="primary">PDF speichern</button><button id="shareTimesheet" class="secondary">PDF teilen</button></div>
+        <p class="muted small">Auf iPhone kannst du über Teilen anschließend Mail, Nachrichten oder Dateien auswählen.</p>
+      </div>
+    </section>
+
+    <section id="page-profile" class="page">
+      <div class="page-head"><div><h2>Profil</h2><p>Persönliche Angaben und Arbeitsdaten.</p></div></div>
+      <form id="profileForm" class="panel profile-form">
+        <div class="grid2"><label>Vorname<input id="profileFirst"></label><label>Nachname<input id="profileLast"></label></div>
+        <div class="grid2"><label>Personalnummer<input id="profilePersonnel"></label><label>Bundesland<input id="profileState"></label></div>
+        <div class="grid2"><label>Arbeitgeber<input id="profileEmployer"></label><label>Objekt<input id="profileSite"></label></div>
+        <div class="grid2"><label>Stundenlohn €<input id="profileWage" type="number" min="0" step="0.01"></label><label>Objektzulage €<input id="profileAllowance" type="number" min="0" step="0.01"></label></div>
+        <label>Urlaubstage pro Jahr<input id="profileLeave" type="number" min="0" max="366"></label>
+        <button class="primary" type="submit">Profil speichern</button>
+      </form>
+    </section>
+  </main>
+</section>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
