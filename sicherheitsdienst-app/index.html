@@ -12,7 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast"></div>\n<div id="updateBanner" class="update-banner hidden"><span>Eine neue DienstWache-Version ist verfügbar.</span><button id="applyUpdate" class="primary" type="button">Aktualisieren</button></div>
 
 <section id="authView" class="auth-shell">
   <div class="brand-card">
@@ -59,7 +59,7 @@
     <button class="nav" data-page="vacation">Urlaub</button>
     <button class="nav" data-page="incidents">Meldungen</button>
     <button class="nav" data-page="reports">Berichte</button>
-    <button class="nav" data-page="profile">Profil</button>
+    <button class="nav" data-page="company">Firma</button>\n    <button class="nav" data-page="profile">Profil</button>
   </aside>
 
   <main class="main">
@@ -135,6 +135,11 @@
       </div>
     </section>
 
+    <section id="page-company" class="page">
+      <div class="page-head"><div><h2>Firma</h2><p>Firmenkonto, Mitarbeiter und zentraler Zugang.</p></div></div>
+      <div id="companyContent"><div class="panel"><p class="muted">Firmenbereich wird geladen …</p></div></div>
+    </section>
+
     <section id="page-profile" class="page">
       <div class="page-head"><div><h2>Profil</h2><p>Persönliche Angaben und Arbeitsdaten.</p></div></div>
       <form id="profileForm" class="panel profile-form">
@@ -149,6 +154,17 @@
   </main>
 </section>
 
+<button id="helperButton" class="helper-button" type="button" aria-label="Hilfe öffnen"><span class="helper-head">●</span><span class="helper-body">i</span></button>
+<div id="helperPanel" class="helper-panel hidden">
+  <div class="helper-title"><div><strong>WachHelfer</strong><span>Kurzhilfe zur App</span></div><button id="helperClose" class="icon-btn" type="button">×</button></div>
+  <div id="helperAnswer" class="helper-answer">Frag mich zum Beispiel nach Schichten, Urlaub, Firma, PDF oder Updates.</div>
+  <form id="helperForm" class="helper-form">
+    <input id="helperQuestion" placeholder="Was möchtest du wissen?" autocomplete="off">
+    <button class="primary" type="submit">Fragen</button>
+  </form>
+</div>
+
 <script type="module" src="./app.js"></script>
+<script type="module" src="./enterprise.js"></script>
 </body>
 </html>

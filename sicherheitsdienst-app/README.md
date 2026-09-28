@@ -1,23 +1,24 @@
 # DienstWache
 
-Installierbare Web-App für Mitarbeiter im Sicherheitsdienst.
+Installierbare PWA für Mitarbeiter und Firmen im Sicherheitsdienst.
 
 ## Enthalten
 - Registrierung und Anmeldung über Supabase Auth
-- automatische 3-Tage-Testphase
-- serverseitige Zugriffssperre nach Ablauf der Testphase
+- Einzelzugang mit Testphase
+- Firmenkonto mit Rollen: Inhaber, Admin, Objektleitung und Mitarbeiter
+- Firmenbeitritt über Code mit anschließender Admin-Freigabe
+- Firmenzugang mit zentralem Abo-Status und Mitarbeiterlimit
 - Dashboard mit Monatsstunden, Arbeitstagen und Urlaub
-- Dienstzeiten mit Pausenberechnung
-- Urlaubsverwaltung
-- Vorfallmeldungen mit Foto/PDF-Upload
-- Stundennachweis als PDF und Teilen-Funktion
-- PWA-Manifest und Service Worker
-- sichere Benutzertrennung über Supabase RLS
+- Dienstzeiten, Urlaub, Vorfallmeldungen, Datei-Uploads und PDF-Stundennachweis
+- zentrale PWA-Updates: eine Veröffentlichung, anschließend Update-Hinweis für alle installierten Nutzer
+- WachHelfer als integrierte Kurzhilfe
+- sichere Benutzertrennung über Supabase RLS; privilegierte Firmenaktionen laufen über eine JWT-geschützte Edge Function
 
-## Sicherheit
-Im GitHub-Code liegt kein Supabase-Secret-Key. Die App lädt nur die öffentliche Client-Konfiguration über die Supabase Edge Function `app-config`.
+## Firmenbetrieb
+Die Firmenstruktur ist auf mehrere hundert Nutzer ausgelegt. Bestehende persönliche Daten bleiben pro Benutzer getrennt. Firmen-Admins verwalten Mitgliedschaften, nicht die Passwörter der Mitarbeiter.
 
-## Noch offen
-Der Zahlungs-Checkout für 2,99 € pro Monat ist vorbereitet, aber noch nicht verbunden, weil aktuell kein Zahlungsanbieter autorisiert ist.
+## Abrechnung
+Die Datenbank ist auf ein Firmenabo vorbereitet. Der tatsächliche Zahlungs-Checkout und die verbindlichen Preise werden erst nach Festlegung des Geschäftsmodells mit dem Zahlungsanbieter verbunden. Es werden durch diese Version keine Firmen automatisch belastet.
 
-Für E-Mail-Bestätigung und Passwort-Reset sollte die veröffentlichte App-URL in Supabase unter Authentication → URL Configuration als erlaubte Redirect-URL eingetragen werden.
+## Veröffentlichung
+Die PWA kann zentral veröffentlicht werden. Neue Versionen werden vom Service Worker erkannt und den Nutzern als Update angeboten.

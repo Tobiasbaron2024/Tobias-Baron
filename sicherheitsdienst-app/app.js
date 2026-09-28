@@ -221,6 +221,12 @@ function renderAccess() {
   const allowed = hasAccess();
   $("#expiredPanel").classList.toggle("hidden", allowed);
 
+  if (state.companyAccess) {
+    badge.textContent = state.companyAccessLabel || "Firmenzugang aktiv";
+    badge.className = "badge";
+    return;
+  }
+
   if (!state.access) {
     badge.textContent = "Zugang wird eingerichtet";
     badge.className = "badge warn";
