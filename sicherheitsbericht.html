@@ -130,6 +130,12 @@
         const [description, setDescription] = useState("");
         const [photoUrl, setPhotoUrl] = useState(null);
 
+        const [baselineHeating, setBaselineHeating] = useState("");
+        const [currentHeating, setCurrentHeating] = useState("");
+        const [savedMoney, setSavedMoney] = useState("");
+        const [savingsNotes, setSavingsNotes] = useState("");
+        const [savingsEntries, setSavingsEntries] = useState([]);
+
         const previewRef = useRef(null);
 
         // Entwurf laden
@@ -144,6 +150,11 @@
             setTime(data.time || "");
             setDescription(data.description || "");
             setPhotoUrl(data.photoUrl || null);
+            setBaselineHeating(data.baselineHeating || "");
+            setCurrentHeating(data.currentHeating || "");
+            setSavedMoney(data.savedMoney || "");
+            setSavingsNotes(data.savingsNotes || "");
+            setSavingsEntries(data.savingsEntries || []);
           } catch {}
         }, []);
 
@@ -156,9 +167,26 @@
             time,
             description,
             photoUrl,
+            baselineHeating,
+            currentHeating,
+            savedMoney,
+            savingsNotes,
+            savingsEntries,
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        }, [reportType, location, date, time, description, photoUrl]);
+        }, [
+          reportType,
+          location,
+          date,
+          time,
+          description,
+          photoUrl,
+          baselineHeating,
+          currentHeating,
+          savedMoney,
+          savingsNotes,
+          savingsEntries,
+        ]);
 
         const handlePhotoUpload = (e) => {
           const file = e.target.files?.[0];
@@ -166,6 +194,38 @@
           const reader = new FileReader();
           reader.onload = (ev) => setPhotoUrl(ev.target.result);
           reader.readAsDataURL(file);
+        };
+
+        const parsedBaseline = parseFloat(baselineHeating);
+        const parsedCurrent = parseFloat(currentHeating);
+
+        const energySaved =
+          !isNaN(parsedBaseline) && !isNaN(parsedCurrent)
+            ? Math.max(0, parsedBaseline - parsedCurrent)
+            : null;
+
+        const percentSaved =
+          !isNaN(parsedBaseline) && parsedBaseline > 0 && !isNaN(parsedCurrent)
+            ? Math.max(0, ((parsedBaseline - parsedCurrent) / parsedBaseline) * 100)
+            : null;
+
+        const handleAddSavingsEntry = () => {
+          if (isNaN(parsedBaseline) || isNaN(parsedCurrent)) return;
+          const entry = {
+            id: crypto.randomUUID(),
+            date: date || new Date().toISOString().slice(0, 10),
+            baseline: parsedBaseline,
+            current: parsedCurrent,
+            energySaved: Math.max(0, parsedBaseline - parsedCurrent),
+            percentSaved:
+              parsedBaseline > 0
+                ? Math.max(0, ((parsedBaseline - parsedCurrent) / parsedBaseline) * 100)
+                : 0,
+            savedMoney: savedMoney || "0",
+            notes: savingsNotes,
+          };
+          setSavingsEntries((prev) => [...prev, entry]);
+          setSavingsNotes("");
         };
 
         const handleGeneratePdf = async () => {
@@ -259,6 +319,78 @@
                 <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} />
               </label>
 
+              <hr style={{ margin: "1.5rem 0" }} />
+              <h2>Heiz-Ersparnis erfassen</h2>
+              <p style={{ marginTop: "0.25rem", color: "#4b5563" }}>
+                Trage Referenz- und aktuellen Verbrauch ein, um die prozentuale Einsparung und
+                deine Ersparnis zu verfolgen.
+              </p>
+
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <label style={{ flex: 1, minWidth: "180px" }}>
+                  <span>Referenzverbrauch (z. B. kWh)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={baselineHeating}
+                    onChange={(e) => setBaselineHeating(e.target.value)}
+                    placeholder="z. B. 1200"
+                  />
+                </label>
+                <label style={{ flex: 1, minWidth: "180px" }}>
+                  <span>Aktueller Verbrauch</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={currentHeating}
+                    onChange={(e) => setCurrentHeating(e.target.value)}
+                    placeholder="z. B. 980"
+                  />
+                </label>
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <label style={{ flex: 1, minWidth: "180px" }}>
+                  <span>Ersparte Kosten (€)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={savedMoney}
+                    onChange={(e) => setSavedMoney(e.target.value)}
+                    placeholder="optional"
+                  />
+                </label>
+                <label style={{ flex: 1, minWidth: "180px" }}>
+                  <span>Notizen zur Einsparung</span>
+                  <input
+                    value={savingsNotes}
+                    onChange={(e) => setSavingsNotes(e.target.value)}
+                    placeholder="z. B. Thermostat gesenkt"
+                  />
+                </label>
+              </div>
+
+              <div style={{ background: "#f8fafc", borderRadius: "0.75rem", padding: "0.75rem", marginTop: "0.75rem" }}>
+                <p style={{ margin: 0 }}>
+                  <strong>Aktuelle Berechnung:</strong>
+                </p>
+                <p style={{ margin: "0.25rem 0" }}>
+                  Eingespart: {energySaved !== null ? `${energySaved.toFixed(1)} Einheiten` : "—"}
+                </p>
+                <p style={{ margin: 0 }}>
+                  Prozentual: {percentSaved !== null ? `${percentSaved.toFixed(1)} % weniger` : "—"}
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.75rem", flexWrap: "wrap" }}>
+                <button type="button" className="btn" onClick={handleAddSavingsEntry}>
+                  Einsparung speichern
+                </button>
+              </div>
+
               {/* Aktion */}
               <button className="btn" type="submit">
                 PDF erstellen
@@ -266,21 +398,84 @@
             </form>
 
             {/* Vorschau */}
-            <div className="preview-wrapper">
-              <div className="preview-page" ref={previewRef}>
-                <h2 style={{ textAlign: "center" }}>{reportType}</h2>
-                <p>
-                  <strong>Ort:</strong> {location || "—"}
-                </p>
-                <p>
-                  <strong>Datum:</strong> {date || "—"} &nbsp; <strong>Uhrzeit:</strong> {time || "—"}
-                </p>
-                <p style={{ whiteSpace: "pre-wrap" }}>{autogeneratedText}</p>
-                {photoUrl && (
-                  <img src={photoUrl} alt="Angehängtes Foto" style={{ marginTop: "1rem", maxHeight: "120mm" }} />
-                )}
+              <div className="preview-wrapper">
+                <div className="preview-page" ref={previewRef}>
+                  <h2 style={{ textAlign: "center" }}>{reportType}</h2>
+                  <p>
+                    <strong>Ort:</strong> {location || "—"}
+                  </p>
+                  <p>
+                    <strong>Datum:</strong> {date || "—"} &nbsp; <strong>Uhrzeit:</strong> {time || "—"}
+                  </p>
+                  <p style={{ whiteSpace: "pre-wrap" }}>{autogeneratedText}</p>
+                  <div style={{ marginTop: "1.5rem" }}>
+                    <h3>Heiz-Ersparnis</h3>
+                    <p style={{ marginTop: 0 }}>
+                      Aktuelle Berechnung:{" "}
+                      {percentSaved !== null
+                        ? `${percentSaved.toFixed(1)} % weniger geheizt (≈ ${energySaved?.toFixed(1)} Einheiten)`
+                        : "—"}
+                      {savedMoney ? `, ${savedMoney} € gespart` : ""}
+                    </p>
+                    {savingsEntries.length > 0 ? (
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.95rem" }}>
+                        <thead>
+                          <tr>
+                            <th style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "0.35rem 0" }}>
+                              Datum
+                            </th>
+                            <th style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "0.35rem 0" }}>
+                              Referenz
+                            </th>
+                            <th style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "0.35rem 0" }}>
+                              Aktuell
+                            </th>
+                            <th style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "0.35rem 0" }}>
+                              Ersparnis
+                            </th>
+                            <th style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "0.35rem 0" }}>
+                              % weniger
+                            </th>
+                            <th style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "0.35rem 0" }}>
+                              Notiz
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {savingsEntries.map((entry) => (
+                            <tr key={entry.id}>
+                              <td style={{ padding: "0.35rem 0", borderBottom: "1px solid #f1f5f9" }}>{entry.date}</td>
+                              <td style={{ padding: "0.35rem 0", borderBottom: "1px solid #f1f5f9" }}>
+                                {entry.baseline}
+                              </td>
+                              <td style={{ padding: "0.35rem 0", borderBottom: "1px solid #f1f5f9" }}>
+                                {entry.current}
+                              </td>
+                              <td style={{ padding: "0.35rem 0", borderBottom: "1px solid #f1f5f9" }}>
+                                {entry.energySaved.toFixed(1)}
+                                {entry.savedMoney ? ` | ${entry.savedMoney} €` : ""}
+                              </td>
+                              <td style={{ padding: "0.35rem 0", borderBottom: "1px solid #f1f5f9" }}>
+                                {entry.percentSaved.toFixed(1)}%
+                              </td>
+                              <td style={{ padding: "0.35rem 0", borderBottom: "1px solid #f1f5f9" }}>
+                                {entry.notes || "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p style={{ marginTop: "0.5rem", color: "#6b7280" }}>
+                        Noch keine Einträge. Füge deine erste Einsparung hinzu.
+                      </p>
+                    )}
+                  </div>
+                  {photoUrl && (
+                    <img src={photoUrl} alt="Angehängtes Foto" style={{ marginTop: "1rem", maxHeight: "120mm" }} />
+                  )}
+                </div>
               </div>
-            </div>
           </div>
         );
       }
