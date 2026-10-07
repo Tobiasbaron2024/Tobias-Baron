@@ -261,7 +261,7 @@ function viewHome(){
 }
 
 function kpi(label,value,cls){ return '<div class="kpi '+cls+'"><span>'+label+'</span><b>'+value+'</b></div>'; }
-function plannedRow(x){return '<div class="list-row"><div><b>'+esc(x.note||CATS[x.category]||"Geplant")+'</b><small>'+de(x.tx_date)+' · '+esc(CATS[x.category]||x.category)+'</small></div><strong class="'+(x.kind==="in"?"income":"')+'">'+(x.kind==="in"?"+ ":"− ")+eur(x.amount)+'</strong></div>';}
+function plannedRow(x){return '<div class="list-row"><div><b>'+esc(x.note||CATS[x.category]||"Geplant")+'</b><small>'+de(x.tx_date)+' · '+esc(CATS[x.category]||x.category)+'</small></div><strong class="'+(x.kind==="in"?"income":"expense")+'">'+(x.kind==="in"?"+ ":"− ")+eur(x.amount)+'</strong></div>';}
 
 function viewBook(){
   const c=compute(state.periodOffset);
