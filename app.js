@@ -47,6 +47,12 @@ const icon = {
 };
 
 function storeSession(s){ state.session=s; if(s) localStorage.setItem("groschen.session",JSON.stringify(s)); else localStorage.removeItem("groschen.session"); }
+async function refreshSession(){
+  if(!state.session?.refresh_token) throw new Error("Sitzung abgelaufen.");
+  const d=await auth("token?grant_type=refresh_token",{refresh_token:state.session.refresh_token});
+  state.session={access_token:d.access_token,refresh_token:d.refresh_token||state.session.refresh_token,user:d.user||state.session.user};
+  storeSession(state.session);
+}
 function loadSession(){ try{state.session=JSON.parse(localStorage.getItem("groschen.session")||"null")}catch{state.session=null} }
 
 async function auth(path, body){
@@ -62,10 +68,14 @@ function headers(){
   return {apikey:SB_KEY,"Content-Type":"application/json",Authorization:"Bearer "+(state.session?.access_token||SB_KEY)};
 }
 
-async function rest(table, query="", opts={}){
+async function rest(table, query="", opts={}, retry=true){
   const r=await fetch(SB_URL+"/rest/v1/"+table+(query?"?"+query:""),{
     ...opts, headers:{...headers(),...(opts.headers||{})}
   });
+  if(r.status===401 && retry && state.session?.refresh_token){
+    await refreshSession();
+    return rest(table,query,opts,false);
+  }
   if(!r.ok){
     const d=await r.json().catch(()=>({}));
     throw new Error(d.message||("Fehler "+r.status));
@@ -363,8 +373,8 @@ function viewSettings(){
       field("Sparziel pro Zeitraum","number","p-save",p.savings_goal||0,"€")+
       field("Haushaltsgröße","number","p-household",p.household_size||1,"Personen")+
     '</div><button class="primary" data-save-profile>Speichern</button></section>'+
-    '<section class="card"><h2>Deine Kategorie-Budgets</h2><div class="form-grid">'+
-      CATS.lebensmittel?'<div class="budget-edit">'+state.budgets.map(b=>field(CATS[b.category]||b.category,"number","bud-"+b.category,b.amount)).join("")+'</div>':""+
+    '<section class="card"><div class="split"><div><h2>Deine Kategorie-Budgets</h2><p class="muted">Persönliche Monatsgrenzen für deine wichtigsten Kategorien.</p></div><button class="secondary compact" data-add-budget>+ Budget</button></div><div class="form-grid">'+
+      '<div class="budget-edit">'+state.budgets.map(b=>field(CATS[b.category]||b.category,"number","bud-"+b.category,b.amount)).join("")+'</div>'+
     '</div><button class="primary" data-save-budgets>Budgets speichern</button></section>'+
     '<section class="card"><h2>Konto</h2><p class="settings-line"><span>Status</span><b>'+esc(statusText())+'</b></p><p class="settings-line"><span>E-Mail</span><b>'+esc(state.session.user?.email||"")+'</b></p><button class="secondary" data-logout>Abmelden</button></section>'+
   '</section>';
@@ -495,6 +505,14 @@ document.addEventListener("click",async e=>{
   if(e.target.closest("[data-logout]")){storeSession(null);location.reload();return;}
   if(e.target.closest("[data-save-profile]")){await saveProfileNow();return;}
   if(e.target.closest("[data-save-budgets]")){await saveBudgetsNow();return;}
+  if(e.target.closest("[data-add-budget]")){
+    const cat=window.prompt("Kategorie-Schlüssel, z. B. shopping, lebensmittel oder essen");
+    if(!cat || !CATS[cat]){ if(cat) alert("Unbekannte Kategorie."); return; }
+    const amount=Number(window.prompt("Monatliches Budget in Euro"));
+    if(!(amount>0)) return;
+    await upsert("budgets",{user_id:state.session.user.id,category:cat,amount:amount},"on_conflict=user_id,category");
+    await loadData(); layout(); return;
+  }
   if(e.target.closest("[data-prev-period]")){state.periodOffset--;layout();return;}
   if(e.target.closest("[data-next-period]")){state.periodOffset++;layout();return;}
   const et=e.target.closest("[data-edit-tx]"); if(et){const x=state.tx.find(z=>z.id===et.dataset.editTx);if(x)showModal(x.kind==="in"?"income":"expense",x);return;}
