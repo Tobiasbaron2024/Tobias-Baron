@@ -933,7 +933,7 @@ return `<div class="item ev" style="cursor:default"><span class="t"><span class=
 </section>`;
 }
 async function loadStats() { try { S.stats = await API.rpc('admin_stats', { p_days: 30 }); } catch (e) { toast(e.message); } if (S.view === 'statistik') renderApp(); }
-function openSheet(html) { $('#sheet-body').innerHTML = html; $('#sheet-wrap').hidden = false; positionEmbeddedSheet(); embeddedUpdate(); setTimeout(() => { const f = $('#sheet-body [autofocus]'); if (f) f.focus(); }, 60); }
+function openSheet(html) { $('#sheet-body').innerHTML = html; $('#sheet-wrap').hidden = false; const sh = $('#sheet-wrap .sheet'); if (sh) sh.scrollTop = 0; positionEmbeddedSheet(); embeddedUpdate(); setTimeout(() => { positionEmbeddedSheet(); const f = $('#sheet-body [autofocus]'); if (f) f.focus({ preventScroll: true }); }, 60); }
 function closeSheet() { $('#sheet-wrap').hidden = true; $('#sheet-body').innerHTML = ''; embeddedUpdate(); }
 const sheetHead = (t) => `<div class="sheet-head"><h2 id="sheet-title">${t}</h2><button class="icon-btn" data-close aria-label="Schließen">${I.x}</button></div>`;
 let txDraft = null;
@@ -1031,8 +1031,11 @@ function embeddedUpdate() { if (!embedded) return; requestAnimationFrame(() => {
 function positionEmbeddedSheet() {
  if (!embedded || $('#sheet-wrap').hidden) return;
  const frame=window.frameElement, wrap=$('#sheet-wrap'); if (!frame) return;
- const top=Math.max(0,Math.min((document.querySelector('.shell')?.getBoundingClientRect().height || 0)-window.parent.innerHeight,-frame.getBoundingClientRect().top));
- wrap.style.top=`${top}px`;wrap.style.height=`${window.parent.innerHeight}px`;
+ const pv=window.parent.innerHeight, ft=frame.getBoundingClientRect().top;
+ let navH=0; try{const nav=window.parent.document.querySelector('nav.unten');if(nav&&getComputedStyle(nav).display!=='none'){const r=nav.getBoundingClientRect();if(r.top<pv)navH=Math.max(0,pv-r.top);}}catch{}
+ const top=Math.max(0,-ft), avail=Math.max(260,pv-Math.max(0,ft)-navH);
+ wrap.style.setProperty('top',`${top}px`,'important');wrap.style.setProperty('bottom','auto','important');wrap.style.setProperty('height',`${avail}px`,'important');
+ const sh=wrap.querySelector('.sheet'); if(sh) sh.style.setProperty('max-height',`${avail-8}px`,'important');
 }
 if (embedded) {
  window.addEventListener('message',async e=>{if(e.origin!==location.origin||e.source!==window.parent)return;
