@@ -276,3 +276,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 
 .period-edit{display:inline-flex;align-items:center;justify-self:start;margin-top:-6px;padding:6px 12px;border-radius:999px;border:1px solid color-mix(in srgb,var(--accent-ink) 35%,transparent);background:transparent;color:inherit;font:600 13px/1.2 var(--f-body);cursor:pointer}
 .period-edit:hover{background:color-mix(in srgb,var(--accent-ink) 10%,transparent)}
+
+.budget-check .settings-row b,.budget-close .settings-row b{font-variant-numeric:tabular-nums}
+.budget-check table td.num,.budget-check table th.num{text-align:right;font-variant-numeric:tabular-nums}
+.budget-check table{min-width:0}.budget-check th,.budget-check td{padding:8px 10px}

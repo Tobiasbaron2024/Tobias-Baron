@@ -288,6 +288,62 @@ return { start, end, custom, sI, eI, totalDays, txs, outs, recIn, recOut, oneIn,
 daysLeft, elapsed, restFromToday, daily, todayLeft, restNow, tomorrowDaily, ideal, avg, forecastEnd, perDay, byCat, state, offset, recNotes, spentYesterday, ...(offset===0?budgetToday({today:todayISO(),profile:S.profile||{},recurring:S.recurring,transactions:S.tx,prefs:S.prefs,income:S.income}):{}) };
 }
 const periodLabel = (c) => `${deDate(c.start)} – ${deDate(c.end)}`;
+/* Budgetgeld-Check: Prognose im laufenden Zeitraum, Abschluss und Empfehlung pro Monat */
+function budgetCheck() {
+const cur = compute(0);
+const firstTx = S.tx.reduce((m, x) => (x.kind === 'out' && (!m || x.date < m) ? x.date : m), null);
+const done = [];
+if (firstTx) for (let k = -1; k >= -12 && done.length < 6; k--) { const p = compute(k); if (p.eI < firstTx) break; done.push(p); }
+const withData = done.filter((p) => p.spentTotal > 0);
+const sumSpent = sum(withData.map((p) => p.spentTotal)), sumDays = sum(withData.map((p) => p.totalDays));
+const curDays = Math.max(1, cur.elapsed || 1);
+const curSpent = (cur.spentBefore || 0) + (cur.spentToday || 0);
+const curAvg = curSpent / curDays;
+const preliminary = !sumDays;
+const basisAvg = preliminary ? curAvg : sumSpent / sumDays;
+const useHistory = !preliminary && (cur.elapsed || 0) < 5;
+const rate = useHistory ? basisAvg : curAvg;
+const forecast = curSpent + (cur.spentFuture || 0) + rate * Math.max(0, (cur.daysLeft || 0) - 1);
+const rec = basisAvg > 0 ? Math.ceil((basisAvg * MONTH_DAYS * 1.05) / 10) * 10 : null;
+const planMonth = cur.totalDays ? (cur.available / cur.totalDays) * MONTH_DAYS : 0;
+return { cur, done, withData, curDays, curSpent, curAvg, forecast, rate, useHistory, preliminary, basisAvg, rec, planMonth, last: done[0] || null };
+}
+function recText(b) {
+if (!b.rec) return 'Sobald du Ausgaben buchst, rechnet Groschen hier aus, wie viel Budgetgeld du pro Monat wirklich brauchst.';
+const how = b.preliminary
+  ? `Vorläufig aus deinem laufenden Zeitraum (Ø ${eur(b.basisAvg)} pro Tag). Genau wird es, sobald der erste Zeitraum abgeschlossen ist.`
+  : `Aus ${b.withData.length === 1 ? 'deinem letzten abgeschlossenen Zeitraum' : `deinen letzten ${b.withData.length} abgeschlossenen Zeiträumen`}: Ø ${eur(b.basisAvg)} pro Tag × 30,4 Tage + 5 % Puffer.`;
+const d = Math.round(b.planMonth - b.rec);
+const cmp = b.planMonth > 0 && Math.abs(d) >= 10 ? (d > 0 ? ` Das sind etwa ${eur0(d)} weniger, als dir gerade pro Monat zur Verfügung steht.` : ` Das sind etwa ${eur0(-d)} mehr, als dir gerade pro Monat zur Verfügung steht.`) : '';
+return `${how}${cmp}`;
+}
+function budgetCheckCard(full) {
+const b = budgetCheck(), c = b.cur;
+const hasData = b.curSpent > 0 || b.withData.length > 0;
+const diff = c.available - b.forecast, enough = diff >= 0;
+const hist = full && b.withData.length ? `<h3 style="margin:18px 0 8px">Abgeschlossene Zeiträume</h3><div class="table-wrap"><table class="table"><thead><tr><th>Zeitraum</th><th class="num">Ausgegeben</th><th class="num">Tage</th><th class="num">Ø pro Tag</th></tr></thead><tbody>${b.withData.map((p) => `<tr><td>${deDate(p.start, false)}–${deDate(p.end, false)}</td><td class="num">${eur(p.spentTotal)}</td><td class="num">${p.totalDays}</td><td class="num">${eur(p.spentTotal / p.totalDays)}</td></tr>`).join('')}</tbody></table></div>` : '';
+return `<section class="card budget-check"><div class="card-head"><h2>Budgetgeld-Check</h2>${hasData && c.available > 0 ? (enough ? '<span class="badge good">Reicht</span>' : '<span class="badge bad">Reicht nicht</span>') : ''}</div>
+<div class="settings-row"><span>Eingeplant ${periodLabel(c)}</span><b>${eur(c.available)}</b></div>
+<div class="settings-row"><span>Bisher ausgegeben (${b.curDays} ${b.curDays === 1 ? 'Tag' : 'Tage'})</span><b>${eur(b.curSpent)}</b></div>
+<div class="settings-row"><span>Ø pro Tag bisher</span><b>${eur(b.curAvg)}</b></div>
+<div class="settings-row"><span>Prognose bis ${deDate(c.end)}</span><b>${eur(b.forecast)}</b></div>
+${hasData ? `<p>${enough ? `Geht es so weiter, bleiben am ${deDate(c.end)} etwa <b class="money">${eur(diff)}</b> übrig.` : `Geht es so weiter, fehlen am ${deDate(c.end)} etwa <b class="money">${eur(-diff)}</b>.`}${b.useHistory ? ` Weil der Zeitraum gerade erst begonnen hat, rechnet Groschen mit deinem bisherigen Schnitt von ${eur(b.rate)} pro Tag.` : ''}${c.daysLeft > 0 && c.daysLeft <= 3 ? ` Dein Zeitraum endet in ${c.daysLeft} ${c.daysLeft === 1 ? 'Tag' : 'Tagen'}.` : ''}</p>` : ''}
+<div class="notice" style="margin-top:12px"><b>Empfohlenes Budgetgeld: ${b.rec ? eur0(b.rec) + ' pro Monat' : 'noch offen'}</b><br><span class="small">${recText(b)}</span></div>
+${hist}
+${full ? '' : '<button class="btn sm" data-act="go" data-view="analyse" style="margin-top:12px">Alle Zeiträume ansehen</button>'}
+</section>`;
+}
+function periodCloseNotice() {
+const b = budgetCheck(), p = b.last, c = b.cur;
+if (!p || p.spentTotal <= 0 || diffDays(c.start, parseD(todayISO())) > 4) return '';
+return `<section class="card budget-close"><div class="card-head"><h2>Abschluss ${periodLabel(p)}</h2><span class="badge ${p.spentTotal <= p.available ? 'good' : 'bad'}">${p.spentTotal <= p.available ? 'Hat gereicht' : 'Überzogen'}</span></div>
+<div class="settings-row"><span>Ausgegeben in ${p.totalDays} Tagen</span><b>${eur(p.spentTotal)}</b></div>
+<div class="settings-row"><span>Ø pro Tag</span><b>${eur(p.spentTotal / p.totalDays)}</b></div>
+<div class="settings-row"><span>Eingeplant waren</span><b>${eur(p.available)}</b></div>
+<div class="notice" style="margin-top:12px"><b>Empfohlenes Budgetgeld: ${b.rec ? eur0(b.rec) + ' pro Monat' : 'noch offen'}</b><br><span class="small">${recText(b)}</span></div>
+</section>`;
+}
+
 /* Spartipps: regelbasiert, mit geschätzter Ersparnis pro Jahr */
 function buildTips() {
 const tips = [];
@@ -470,7 +526,7 @@ const cards=[...$('#main').querySelectorAll('section.card')];
 foldCards($('#main'), `groschen-${S.view}`, cards.map((card,index)=>({
  index,key:`${index}-${card.querySelector('h2')?.textContent?.trim()||'bereich'}`,
  label:card.querySelector('h2')?.textContent?.trim()||`Bereich ${index+1}`,
- open:index===0||(S.view==='uebersicht'&&index===1)||(S.view==='fixkosten'&&index===1)||(S.view==='analyse'&&index===1)||/^(Geplant & kommend|Ausblick|Vergleich mit dem Durchschnitt)/.test(card.querySelector('h2')?.textContent?.trim()||'')
+ open:index===0||(S.view==='uebersicht'&&index===1)||(S.view==='fixkosten'&&index===1)||(S.view==='analyse'&&index===1)||/^(Geplant & kommend|Ausblick|Vergleich mit dem Durchschnitt|Abschluss |Budgetgeld-Check)/.test(card.querySelector('h2')?.textContent?.trim()||'')
 })));
 bindCharts();
 embeddedUpdate();
@@ -537,12 +593,9 @@ ${last.length ? `<div class="list">${last.map(txRow).join('')}</div>` : `<div cl
 </section>
 </div>
 <div class="stack">
+${periodCloseNotice()}
 <section class="card"><div class="card-head"><h2>So wird gerechnet</h2></div>${receipt(c)}</section>
-<section class="card">
-<div class="card-head"><h2>Prognose</h2>${c.forecastEnd >= 0 ? '<span class="badge good">Reicht</span>' : '<span class="badge bad">Wird knapp</span>'}</div>
-<p>Du gibst im Schnitt <b class="money">${eur(c.avg)}</b> pro Tag aus. Geht es so weiter, ${c.forecastEnd >= 0 ? `bleiben am ${deDate(c.end)} etwa <b class="money">${eur(c.forecastEnd)}</b> übrig.` : `fehlen am ${deDate(c.end)} etwa <b class="money">${eur(-c.forecastEnd)}</b>.`}</p>
-<p class="small muted">Ideal wären ${eur(Math.max(0, c.ideal))} pro Tag über den ganzen Zeitraum.</p>
-</section>
+${budgetCheckCard(false)}
 ${deadlines.length ? `<section class="card"><div class="card-head"><h2>Kündigungsfristen</h2></div><div class="list">${deadlines.map((r) => `<button class="item" data-act="edit-rec" data-id="${r.id}">${catIcon(r.category)}<span class="t"><b>${esc(r.name)}</b><small>kündbar bis ${deDate(r.cancel_by)}</small></span><span class="v">${diffDays(parseD(todayISO()), parseD(r.cancel_by))} Tage</span></button>`).join('')}</div></section>` : ''}
 <section class="card">
 <div class="card-head"><h2>Spartipps für dich</h2><button class="btn sm" data-act="go" data-view="spartipps">Alle</button></div>
@@ -824,6 +877,7 @@ return `${topbar('Analyse', periodNav('an-period', S.anOffset, c))}
 <div class="kpi"><span class="label">Ø pro Tag</span><b>${eur(c.elapsed ? c.spentTotal / c.elapsed : 0)}</b></div>
 <div class="kpi ${rate == null ? '' : rate < 0 ? 'bad' : rate < 10 ? 'warn' : 'good'}"><span class="label">Übrig vom Einkommen</span><b>${rate == null ? '–' : rate + ' %'}</b></div>
 </div>
+${S.anOffset === 0 ? `<div style="margin-bottom:16px">${budgetCheckCard(true)}</div>` : ''}
 <div class="grid-2">
 <section class="card"><div class="card-head"><h2>Ausgaben nach Kategorie</h2><span class="small muted">Anteil · ggü. Vorzeitraum</span></div>
 ${cats.length ? `<div class="bars">${cats.map(([k, v]) => { const pv = p.byCat[k] || 0; const d = pv ? Math.round(((v - pv) / pv) * 100) : null;
