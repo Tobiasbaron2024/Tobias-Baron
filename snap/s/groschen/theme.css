@@ -1,0 +1,115 @@
+/* Groschen – Design „Nachtblau“: dunkles Blau, leuchtendes Eisblau, weiche Unschärfe */
+:root, :root:not([data-theme="light"]), :root[data-theme="dark"]{
+color-scheme: dark;
+--bg:#081421; --bg-2:#0F2438; --surface:rgba(17,38,58,.62); --surface-2:rgba(24,50,75,.55); --paper:#0D2032;
+--ink:#E4F1FB; --ink-2:#A8C3D8; --muted:#7893AA; --line:rgba(130,190,235,.16); --line-2:rgba(130,190,235,.28);
+--accent:#7CC6F4; --accent-2:#A3D8F8; --accent-ink:#04121E; --accent-soft:rgba(124,198,244,.14);
+--glow:0 0 22px rgba(124,198,244,.45);
+--good:#5FD8A6; --good-soft:rgba(95,216,166,.13); --warn:#F3C66E; --warn-soft:rgba(243,198,110,.13); --bad:#FF7F8A; --bad-soft:rgba(255,127,138,.13);
+--shadow:0 1px 2px rgba(0,0,0,.35),0 12px 36px rgba(0,0,0,.35);
+--f-display:"Zilla Slab", Georgia, "Times New Roman", serif;
+}
+:root[data-theme="light"]{
+color-scheme: light;
+--bg:#E3EEF7; --bg-2:#CFE1EF; --surface:rgba(255,255,255,.72); --surface-2:rgba(240,247,252,.8); --paper:#F6FAFD;
+--ink:#0B1D2E; --ink-2:#34506A; --muted:#5E7890; --line:rgba(20,70,110,.14); --line-2:rgba(20,70,110,.24);
+--accent:#1F6FA8; --accent-2:#185C8C; --accent-ink:#FFFFFF; --accent-soft:rgba(31,111,168,.12);
+--glow:0 0 18px rgba(31,111,168,.25);
+--good:#157A52; --good-soft:rgba(21,122,82,.12); --warn:#98650E; --warn-soft:rgba(152,101,14,.12); --bad:#B53040; --bad-soft:rgba(181,48,64,.1);
+--shadow:0 1px 2px rgba(11,29,46,.08),0 10px 30px rgba(11,29,46,.1);
+}
+html{background:var(--bg)}
+body{background:radial-gradient(120% 90% at 50% 45%,var(--bg-2) 0%,var(--bg) 70%) fixed;background-color:var(--bg);position:relative;min-height:100%}
+/* Unscharfe Lichtkreise im Hintergrund, wie auf dem Foto */
+body::before{content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;
+background:
+radial-gradient(circle at 12% 18%,rgba(124,198,244,.32) 0 5%,transparent 6%),
+radial-gradient(circle at 12% 18%,transparent 0 6.5%,rgba(124,198,244,.12) 7%,transparent 8%),
+radial-gradient(circle at 84% 14%,rgba(124,198,244,.28) 0 6%,transparent 7%),
+radial-gradient(circle at 70% 72%,rgba(124,198,244,.26) 0 7%,transparent 8%),
+radial-gradient(circle at 70% 72%,transparent 0 8.5%,rgba(124,198,244,.1) 9%,transparent 10%),
+radial-gradient(circle at 26% 80%,rgba(124,198,244,.22) 0 5%,transparent 6%),
+radial-gradient(circle at 92% 50%,rgba(124,198,244,.12) 0 4%,transparent 5%),
+radial-gradient(circle at 44% 40%,rgba(124,198,244,.08) 0 9%,transparent 10%);
+filter:blur(18px)}
+:root[data-theme="light"] body::before{opacity:.55}
+h1,h2,h3{font-family:var(--f-display);letter-spacing:0}
+h1{font-weight:700}
+::selection{background:rgba(124,198,244,.35)}
+
+/* Glas-Flächen */
+.card,.auth-card,.side,.kpi,.tip,.plan,.sheet,.bottom-nav,.item:hover{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card,.auth-card{background:var(--surface);border-color:var(--line);box-shadow:var(--shadow)}
+.side{background:rgba(8,22,36,.72);border-right-color:var(--line)}
+:root[data-theme="light"] .side{background:rgba(255,255,255,.7)}
+.bottom-nav{background:rgba(8,22,36,.82)}
+:root[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
+.sheet{background:#0E2236;border:1px solid var(--line-2)}
+:root[data-theme="light"] .sheet{background:#F4F9FD}
+.sheet-backdrop{background:rgba(3,10,18,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.input,.select{background:rgba(6,18,30,.55);border-color:var(--line-2)}
+:root[data-theme="light"] .input,:root[data-theme="light"] .select{background:#fff}
+.select option{background:#0E2236;color:#E4F1FB}
+.input:focus,.select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),var(--glow)}
+.btn{background:rgba(20,44,66,.6)}
+:root[data-theme="light"] .btn{background:#fff}
+.btn.primary{background:linear-gradient(180deg,#8FD0F7,#5FB4EC);border-color:transparent;color:var(--accent-ink);box-shadow:var(--glow)}
+.btn.primary:hover{background:linear-gradient(180deg,#A8DBFA,#6DBDF0)}
+:root[data-theme="light"] .btn.primary{background:linear-gradient(180deg,#2A80BE,#1B6399);color:#fff}
+.btn.danger{background:transparent}
+.icon-btn{background:rgba(20,44,66,.6);border-color:var(--line-2);color:var(--ink-2)}
+.seg{background:rgba(6,18,30,.5)}
+.seg button.on{background:var(--accent-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chip{background:rgba(20,44,66,.5)}
+.chip.on{box-shadow:var(--glow)}
+
+/* Marke: G im leuchtenden Ring */
+.brand-mark,.boot-mark{background:radial-gradient(circle at 50% 45%,#16324B,#0A1827);color:#CFEAFF;border-radius:50%;box-shadow:inset 0 0 0 2px #7CC6F4,0 0 0 4px rgba(8,20,33,.9),0 0 0 5px rgba(124,198,244,.55),var(--glow);font-family:"Zilla Slab",Georgia,serif;font-weight:700;text-shadow:0 0 10px rgba(124,198,244,.8)}
+.nav-btn.on{background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--line-2)}
+.nav-btn.on svg{filter:drop-shadow(0 0 6px rgba(124,198,244,.7))}
+
+/* Hauptanzeige mit Ring-Emblem */
+.hero{background:linear-gradient(150deg,#15395A 0%,#0C2136 60%,#0A1B2C 100%);color:var(--ink);border:1px solid rgba(124,198,244,.3);box-shadow:var(--shadow),inset 0 0 60px rgba(124,198,244,.08)}
+.hero::after{content:"";position:absolute;right:-70px;top:50%;width:260px;height:260px;transform:translateY(-50%);border-radius:50%;
+border:2px solid rgba(124,198,244,.35);box-shadow:0 0 0 14px rgba(124,198,244,.05),0 0 0 16px rgba(124,198,244,.22),0 0 40px rgba(124,198,244,.25),inset 0 0 40px rgba(124,198,244,.15);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.hero .label{color:#9CC7E6}
+.hero-amount{font-family:"Zilla Slab",Georgia,serif;font-weight:700;letter-spacing:-.01em;color:#D8EFFF;text-shadow:0 0 28px rgba(124,198,244,.55)}
+.hero-sub{color:#B5D3EA}
+.meter{background:rgba(124,198,244,.15)}
+.meter>i{background:linear-gradient(90deg,#5FB4EC,#A3D8F8);box-shadow:0 0 12px rgba(124,198,244,.8)}
+.period-chip{background:rgba(124,198,244,.12);border:1px solid rgba(124,198,244,.25);color:#CFE6F7}
+.hero.over{background:linear-gradient(150deg,#4A1A26,#2A0F18);border-color:rgba(255,127,138,.4);color:#FFE3E6}
+.hero.over::after{border-color:rgba(255,127,138,.35);box-shadow:0 0 0 16px rgba(255,127,138,.14),0 0 40px rgba(255,127,138,.2)}
+.hero.over .hero-amount{color:#FFD9DD;text-shadow:0 0 28px rgba(255,127,138,.55)}
+.hero.over .label,.hero.over .hero-sub{color:#F7BFC5}
+.hero.over .meter>i{background:#FF9AA3;box-shadow:0 0 12px rgba(255,127,138,.8)}
+:root[data-theme="light"] .hero{background:linear-gradient(150deg,#1F5F8F,#123E61);color:#fff}
+@media (max-width:560px){.hero::after{width:190px;height:190px;right:-80px}}
+
+.kpi{background:var(--surface-2);border-color:var(--line)}
+.kpi b{font-family:"Zilla Slab",Georgia,serif}
+.kpi.good b,.item .v.in,.tip-save{text-shadow:0 0 14px rgba(95,216,166,.35)}
+.receipt{background:var(--paper);border-color:var(--line-2)}
+.r-sep{border-top-color:var(--line-2)}
+.bar-row .track{background:rgba(6,18,30,.5);border-color:var(--line)}
+.bar-row .track i{background:linear-gradient(90deg,#5FB4EC,#A3D8F8);box-shadow:0 0 10px rgba(124,198,244,.5)}
+.tip{background:var(--surface);border-color:var(--line)}
+.tip .tip-ic{box-shadow:inset 0 0 0 1px var(--line-2)}
+.plan{background:var(--surface-2);border-color:var(--line-2)}
+.plan.on{border-color:var(--accent);box-shadow:var(--glow)}
+.plan .p-price{font-family:"Zilla Slab",Georgia,serif}
+.plan .p-flag{background:var(--accent);color:var(--accent-ink)}
+th{background:rgba(6,18,30,.6)}
+.fab{background:linear-gradient(180deg,#8FD0F7,#5FB4EC);color:var(--accent-ink);box-shadow:0 0 0 1px rgba(163,216,248,.6),0 10px 30px rgba(124,198,244,.45)}
+.tip-box{background:#E4F1FB;color:#081421}
+.toast{background:#E4F1FB;color:#081421;box-shadow:var(--glow)}
+.badge{background:rgba(20,44,66,.55)}
+.badge.acc{box-shadow:0 0 12px rgba(124,198,244,.25)}
+.item{border-bottom-color:var(--line)}
+.item:hover{background:rgba(124,198,244,.06)}
+.item .ic{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.boot{background:var(--bg)}
+.chart-box .grid-l{stroke:rgba(130,190,235,.12)}
+@media (prefers-reduced-motion:no-preference){.hero::after{animation:ring-glow 6s ease-in-out infinite}}
+@keyframes ring-glow{0%,100%{opacity:.75}50%{opacity:1}}

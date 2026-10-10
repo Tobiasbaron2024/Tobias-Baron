@@ -1,0 +1,16 @@
+{
+  "name": "Groschen Haushaltsbuch",
+  "short_name": "Groschen",
+  "description": "Jeden Tag wissen, wie viel du noch ausgeben kannst.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#081421",
+  "theme_color": "#081421",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" }
+  ]
+}

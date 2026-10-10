@@ -1,0 +1,22 @@
+/* Groschen verwendet innerhalb von Shiftly dessen Rahmen und Lesefluss. */
+html:has(body.embedded),body.embedded{height:auto!important;min-height:0!important;background:transparent!important;overflow:hidden!important}
+body.embedded::before,body.embedded::after{display:none!important}
+body.embedded{--bg:#07121D;--surface:#0E2031;--surface-2:#142B40;--paper:#0E2031;--ink:#E4F1FB;--ink-2:#A8C3D8;--muted:#9CB2C4;--line:rgba(130,190,235,.20);--line-2:rgba(130,190,235,.3);--accent:#6CC0EC;--accent-2:#8FD5F8;--accent-ink:#04121E;--shadow:none;--f-display:system-ui,-apple-system,"Segoe UI",sans-serif;--f-body:system-ui,-apple-system,"Segoe UI",sans-serif;position:relative;font-size:14px}
+body.embedded .shell{display:block;min-height:0}
+body.embedded .side,body.embedded .bottom-nav,body.embedded .fab,body.embedded #main>a.btn.ghost{display:none!important}
+body.embedded .main{padding:0 0 12px;min-height:0;max-width:none}
+body.embedded .card,body.embedded .hero{box-shadow:none;border:1px solid var(--line);backdrop-filter:none}
+body.embedded .topbar{padding-top:4px}
+body.embedded .topbar h1{font-family:var(--f-display)}
+body.embedded .sheet-wrap{position:absolute!important;inset:auto 0 auto 0!important;min-height:0;align-items:end}
+body.embedded .sheet{max-height:90vh}
+@media(min-width:861px){body.embedded .sheet-wrap{align-items:center}}
+body.embedded{--surface-2:var(--surface);--paper:var(--surface);--ink-2:var(--muted);--line-2:var(--line);--accent-2:var(--accent);padding:0;color:var(--ink)}
+body.embedded .card,body.embedded .hero{border-radius:18px;background:var(--surface);color:var(--ink)}
+body.embedded .input,body.embedded input,body.embedded select,body.embedded textarea{background:var(--bg);color:var(--ink);border-color:var(--line);border-radius:11px}
+body.embedded .btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:none}
+body.embedded .sheet{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:18px}
+body.embedded .topbar{padding:8px 0}
+body.embedded .topbar h1{font-size:23px;letter-spacing:-.035em}
+body.embedded .fold-toggle{color:var(--ink);padding:17px 20px}
+body.embedded .fold-toggle::after{color:var(--accent)}
