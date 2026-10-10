@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           set -x
-          mkdir -p snap/g snap/s/groschen
+          mkdir -p snap/g snap/s/groschen # run2
           for f in index.html app.js plus.js aktionen.js styles.css theme.css sw.js manifest.webmanifest; do
             curl -sSL "https://groschen-haushaltsbuch.netlify.app/$f?t=$RANDOM" -o "snap/g/$f"
           done
