@@ -526,7 +526,7 @@ const cards=[...$('#main').querySelectorAll('section.card')];
 foldCards($('#main'), `groschen-${S.view}`, cards.map((card,index)=>({
  index,key:`${index}-${card.querySelector('h2')?.textContent?.trim()||'bereich'}`,
  label:card.querySelector('h2')?.textContent?.trim()||`Bereich ${index+1}`,
- open:index===0||(S.view==='uebersicht'&&index===1)||(S.view==='fixkosten'&&index===1)||(S.view==='analyse'&&index===1)||/^(Geplant & kommend|Ausblick|Vergleich mit dem Durchschnitt|Abschluss |Budgetgeld-Check)/.test(card.querySelector('h2')?.textContent?.trim()||'')
+ open:index===0||(S.view==='uebersicht'&&index===1)||(S.view==='fixkosten'&&index===1)||(S.view==='analyse'&&index===1)||/^(Geplant & kommend|Ausblick|Vergleich mit dem Durchschnitt|Abschluss |Budgetgeld-Check|Budgets$|Ausgaben nach Kategorie)/.test(card.querySelector('h2')?.textContent?.trim()||'')
 })));
 bindCharts();
 embeddedUpdate();
@@ -885,7 +885,7 @@ return `<div class="bar-row"><span class="name">${esc(catName(k))}</span><span c
 </section>
 <section class="card"><div class="card-head"><h2>Budgets</h2><button class="btn sm primary" data-act="new-budget">${I.plus} Budget</button></div>
 ${budgets.length ? `<div class="bars">${budgets.map((b) => { const pc = (b.spent / b.amount) * 100;
-return `<div class="bar-row" data-act="edit-budget" data-cat="${b.category}" style="cursor:pointer"><span class="name">${esc(catName(b.category))}</span><span class="track"><i class="${pc > 100 ? 'over' : pc > 85 ? 'near' : ''}" style="width:${Math.min(100, pc)}%"></i></span><span class="val">${eur(b.spent)} / ${eur0(b.amount)}</span></div>`; }).join('')}</div>` : '<div class="empty"><p>Leg Budgets für einzelne Kategorien fest, z. B. 300 € für Lebensmittel.</p></div>'}
+return `<div class="bar-row" data-act="edit-budget" data-cat="${b.category}" style="cursor:pointer"><span class="name">${esc(catName(b.category))}</span><span class="track"><i class="${pc > 100 ? 'over' : pc > 85 ? 'near' : ''}" style="width:${Math.min(100, pc)}%"></i></span><span class="val">${eur(b.spent)} / ${eur0(b.amount)} <button type="button" class="budget-del" data-act="budget-delete" data-ask="1" data-cat="${b.category}" aria-label="Budget ${esc(catName(b.category))} löschen">Löschen</button></span></div>`; }).join('')}</div><p class="small muted" style="margin-top:10px">Tippe auf ein Budget, um es zu ändern. „Löschen“ setzt es wieder auf 0.</p>` : '<div class="empty"><p>Leg Budgets für einzelne Kategorien fest, z. B. 300 € für Lebensmittel.</p></div>'}
 </section>
 </div>
 ${bm.length ? `<section class="card" style="margin-top:16px" data-bench><div class="card-head"><h2>Vergleich mit dem Durchschnitt</h2><span class="small muted">pro Monat hochgerechnet</span></div>
@@ -1071,10 +1071,10 @@ const b = S.budgets.find((x) => x.category === cat);
 openSheet(`${sheetHead(b ? 'Budget ändern' : 'Neues Budget')}
 <form class="form" id="f-budget" novalidate>
 <label class="field"><span>Kategorie</span><select class="select" id="b-cat" ${b ? 'disabled' : ''}>${CATS.out.map(([k, n]) => `<option value="${k}" ${cat === k ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
-<label class="field"><span>Budget pro Zeitraum in €</span><input class="input" id="b-amount" inputmode="decimal" value="${b ? amountStr(b.amount) : ''}" autofocus required></label>
+<label class="field"><span>Budget pro Zeitraum in € (0 oder leer = löschen)</span><input class="input" id="b-amount" inputmode="decimal" value="${b ? amountStr(b.amount) : ''}" autofocus required></label>
 <p class="error" id="b-err"></p>
 <button class="btn primary block" type="submit">Speichern</button>
-${b ? `<button type="button" class="btn danger block" data-act="budget-delete" data-cat="${b.category}">Budget entfernen</button>` : ''}
+${b ? `<button type="button" class="btn danger block" data-act="budget-delete" data-cat="${b.category}">Budget löschen (wieder auf 0)</button>` : ''}
 </form>`);
 }
 function aboSheet() {
@@ -1190,7 +1190,7 @@ case 'new-budget': budgetSheet(); break;
 case 'edit-period': periodSheet(); break;
 case 'period-reset': { const body = { period_start: null, period_end: null, updated_at: new Date().toISOString() }; await busy(el, () => API.rest('profiles', `user_id=eq.${API.session.user.id}`, { method: 'PATCH', body })); Object.assign(S.profile, body); closeSheet(); renderApp(); periodChanged(); toast('Wieder normaler Zahltag'); break; }
 case 'edit-budget': budgetSheet(el.dataset.cat); break;
-case 'budget-delete': await busy(el, () => API.rest('budgets', `category=eq.${encodeURIComponent(el.dataset.cat)}&user_id=eq.${API.session.user.id}`, { method: 'DELETE' })); S.budgets = S.budgets.filter((b) => b.category !== el.dataset.cat); closeSheet(); renderApp(); break;
+case 'budget-delete': if (el.dataset.ask && !window.confirm(`Budget „${catName(el.dataset.cat)}“ löschen? Es steht danach wieder auf 0.`)) break; await busy(el, () => API.rest('budgets', `category=eq.${encodeURIComponent(el.dataset.cat)}&user_id=eq.${API.session.user.id}`, { method: 'DELETE' })); S.budgets = S.budgets.filter((b) => b.category !== el.dataset.cat); closeSheet(); renderApp(); toast('Budget gelöscht'); break;
 case 'tx-period': S.txOffset = Math.min(0, Math.max(-12, S.txOffset + Number(el.dataset.d))); renderApp(); break;
 case 'an-period': S.anOffset = Math.min(0, Math.max(-12, S.anOffset + Number(el.dataset.d))); renderApp(); break;
 case 'dismiss-tip': {
@@ -1317,8 +1317,13 @@ else { const [row] = await API.rest('recurring', '', { method: 'POST', body, pre
 closeSheet(); renderApp(); toast('Gespeichert');
 }
 if (f.id === 'f-budget') {
-const cat = $('#b-cat').value; const amt = parseAmount($('#b-amount').value);
-if (!(amt > 0)) { $('#b-err').textContent = 'Bitte gib einen Betrag größer als 0 ein.'; return; }
+const cat = $('#b-cat').value; const raw = $('#b-amount').value.trim(); const amt = raw === '' ? 0 : parseAmount(raw);
+if (amt === 0 || (raw !== '' && /^0+([.,]0*)?$/.test(raw))) {
+if (S.budgets.some((b) => b.category === cat)) { await busy(btn, () => API.rest('budgets', `category=eq.${encodeURIComponent(cat)}&user_id=eq.${API.session.user.id}`, { method: 'DELETE' })); S.budgets = S.budgets.filter((b) => b.category !== cat); closeSheet(); renderApp(); toast('Budget gelöscht'); }
+else closeSheet();
+return;
+}
+if (!(amt > 0)) { $('#b-err').textContent = 'Bitte gib einen gültigen Betrag ein. 0 oder leer löscht das Budget.'; return; }
 await busy(btn, () => API.rest('budgets', 'on_conflict=user_id,category', { method: 'POST', body: { category: cat, amount: amt }, prefer: 'resolution=merge-duplicates,return=minimal' }));
 S.budgets = [...S.budgets.filter((b) => b.category !== cat), { category: cat, amount: amt }]; closeSheet(); renderApp(); toast('Budget gespeichert');
 }
