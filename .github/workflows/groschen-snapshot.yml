@@ -19,7 +19,9 @@ jobs:
           for f in index.html app.js plus.js aktionen.js styles.css theme.css embedded.css sw.js; do
             curl -sSL "https://shiftly-schichtzettel.netlify.app/groschen/$f?t=$RANDOM" -o "snap/s/groschen/$f"
           done
-          curl -sSL "https://shiftly-schichtzettel.netlify.app/?t=1" -o snap/s/index.html
+          for f in index.html app.js aktionen.js calc.js daily-budget.js dashboard-order.js dashboard.js day-greeting.js features.js fold.js lohn2026.js object-rates.js pdf.js periods.js plan-import-core.js plan-import-files.js plan-import.js scenes.js style.css urlaub-mehrfach.js urlaub.js verkauf.js wish-plan.js wishes.js manifest.webmanifest sw.js; do
+            curl -sSL "https://shiftly-schichtzettel.netlify.app/$f?t=$RANDOM" -o "snap/s/$f"
+          done
           ls -la snap/g snap/s snap/s/groschen
           git config user.name snapshot-bot
           git config user.email snapshot-bot@users.noreply.github.com
